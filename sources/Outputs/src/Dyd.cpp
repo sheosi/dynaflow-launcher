@@ -62,7 +62,7 @@ const std::unordered_map<algo::GeneratorDefinition::ModelType, std::string> Dyd:
 
 Dyd::Dyd(DydDefinition&& def) : def_{std::forward<DydDefinition>(def)} {}
 
-void
+boost::shared_ptr<dynamicdata::DynamicModelsCollection>
 Dyd::write() {
   dynamicdata::XmlExporter exporter;
   const auto& assemblingDoc = def_.dynamicDataBaseManager.assemblingDocument();
@@ -128,7 +128,8 @@ Dyd::write() {
     }
   }
 
-  exporter.exportToFile(dynamicModelsToConnect, def_.filename, constants::xmlEncoding);
+  // exporter.exportToFile(dynamicModelsToConnect, def_.filename, constants::xmlEncoding);
+  return dynamicModelsToConnect;
 }
 
 std::vector<boost::shared_ptr<dynamicdata::MacroConnector>>

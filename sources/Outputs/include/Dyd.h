@@ -117,7 +117,7 @@ class Dyd {
   /**
    * @brief Write the dyd file
    */
-  void write();
+  boost::shared_ptr<dynamicdata::DynamicModelsCollection> write();
 
  private:
   /**

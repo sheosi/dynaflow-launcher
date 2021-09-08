@@ -22,7 +22,9 @@
 #include "DynamicDataBaseManager.h"
 #include "NetworkManager.h"
 
+#include <DYDDynamicModelsCollection.h>
 #include <JOBJobEntry.h>
+#include <PARParametersSetCollection.h>
 #include <boost/filesystem.hpp>
 
 namespace dfl {
@@ -151,5 +153,7 @@ class Context {
   algo::LinesByIdDefinitions linesById_;                                 ///< Lines by ids definition
 
   boost::shared_ptr<job::JobEntry> jobEntry_;  ///< Dynawo job entry
+  boost::shared_ptr<dynamicdata::DynamicModelsCollection> dydModels_;
+  boost::shared_ptr<parameters::ParametersSetCollection> parSets_;
 };
 }  // namespace dfl

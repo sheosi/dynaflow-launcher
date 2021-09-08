@@ -152,7 +152,7 @@ Context::exportOutputs() {
   dydOutput.append(basename_ + ".dyd");
   outputs::Dyd dydWriter(outputs::Dyd::DydDefinition(basename_, dydOutput.generic_string(), generators_, loads_, slackNode_, hvdcLines_, busesWithDynamicModel_,
                                                      dynamicDataBaseManager_, dynamicModels_));
-  dydWriter.write();
+  dydModels_ = dydWriter.write();
 
   // Par
   // copy constants files
@@ -168,7 +168,7 @@ Context::exportOutputs() {
   parOutput.append(basename_ + ".par");
   outputs::Par parWriter(outputs::Par::ParDefinition(basename_, config_.outputDir(), parOutput, generators_, hvdcLines_, config_.getActivePowerCompensation(),
                                                      busesWithDynamicModel_, dynamicDataBaseManager_, counters_, dynamicModels_, linesById_));
-  parWriter.write();
+  parSets_ = parWriter.write();
 
   // Diagram
   file::path diagramDirectory(config_.outputDir());
@@ -193,7 +193,7 @@ Context::execute() {
   // Since DFL traces are persistent, they can be re-used after simulation is performed outside this function
   LOG(info) << MESS(SimulateInfo, basename_) << LOG_ENDL;
 
-  auto simu = boost::make_shared<DYN::Simulation>(jobEntry_, simu_context, networkManager_.dataInterface());
+  auto simu = boost::make_shared<DYN::Simulation>(jobEntry_, simu_context, dydModels_, basename_ + ".par", parSets_, networkManager_.dataInterface());
   simu->init();
   simu->simulate();
   simu->terminate();

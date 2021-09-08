@@ -23,6 +23,7 @@
 
 #include <DYNLineInterface.h>
 #include <PARParametersSet.h>
+#include <PARParametersSetCollection.h>
 #include <boost/filesystem.hpp>
 #include <boost/shared_ptr.hpp>
 #include <functional>
@@ -96,7 +97,7 @@ class Par {
   /**
    * @brief Export PAR file
    */
-  void write();
+  boost::shared_ptr<parameters::ParametersSetCollection> write();
 
  private:
   /**

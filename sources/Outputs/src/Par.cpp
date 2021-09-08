@@ -166,7 +166,7 @@ const std::string Par::seasonTag_("@SAISON@");
 
 Par::Par(ParDefinition&& def) : def_{std::forward<ParDefinition>(def)} {}
 
-void
+boost::shared_ptr<parameters::ParametersSetCollection>
 Par::write() {
   parameters::XmlExporter exporter;
 
@@ -209,7 +209,10 @@ Par::write() {
     }
   }
 
-  exporter.exportToFile(dynamicModelsToConnect, def_.filepath.generic_string(), constants::xmlEncoding);
+  // exporter.exportToFile(dynamicModelsToConnect, def_.filepath.generic_string(), constants::xmlEncoding);
+  dynamicModelsToConnect->propagateOriginData(def_.filepath.generic_string());
+  dynamicModelsToConnect->getParametersFromMacroParameter();
+  return dynamicModelsToConnect;
 }
 
 boost::optional<std::string>
