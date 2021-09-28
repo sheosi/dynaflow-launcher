@@ -58,5 +58,5 @@ FilesEnd                      =     End of files generation (wall-time: %1%s)
 ContingenciesReadingFrom      =     Reading contingencies from %1% ...
 ContingenciesReadError        =     Error while reading contingencies file %1%: %2%
 ContingencyInvalidBadElemType =     Contingency %1% is invalid: element %2% has an unknown type "%3%"
-ContingencyInvalidForSimulation =     Contingency %1% is invalid for simulation: element %2% invalid "%3%"
+ContingencyInvalidForSimulation =     Contingency %1% is invalid for simulation. Element %2% is invalid, reason: "%3%"
 ContingencySimulationDefined  =     Contingency simulation defined for %1%

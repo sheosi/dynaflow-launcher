@@ -212,7 +212,7 @@ Contingencies::isValidForSimulation(const ContingencyDefinition& c) {
   // A contigency is valid for simulation if all its elements are in the main connected component and have valid types
   for (auto e : c.elements) {
     if (e.status != ContingencyElementDefinition::ValidationStatus::MAIN_CC_VALID_TYPE) {
-      LOG(warn) << MESS(ContingencyInvalidForSimulation, c.id, e.id, toString(e.status));
+      LOG(warn) << MESS(ContingencyInvalidForSimulation, c.id, e.id, toString(e.status)) << LOG_ENDL;
       return false;
     }
   }

@@ -131,7 +131,7 @@ where [option] can be:
         launch [network] [config]                 launch DynaFlow Launcher:
                                                   - network: filepath (only IIDM is supported)
                                                   - config: filepath (JSON configuration file)
-        launch [network] [config] [contingencies] launch DynaFlow Launcher to run a Security Analysis:
+        launch-sa [network] [config] [contingencies] launch DynaFlow Launcher to run a Security Analysis:
                                                   - network: filepath (only IIDM is supported)
                                                   - config: filepath (JSON configuration file)
                                                   - contingencies: filepath (JSON file)
