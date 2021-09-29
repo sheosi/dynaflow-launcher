@@ -94,6 +94,8 @@ Configuration::Configuration(const boost::filesystem::path& filepath) {
      * }
      *
      * where name is the name of the parameter and value its value. If not present, we use its hard-coded default value
+     *
+     * Parameters that are used only in security analysis have a prefix "sa." in its name
      */
 
     auto config = tree.get_child("dfl-config");
