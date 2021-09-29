@@ -111,7 +111,8 @@ DydEvent::buildSwitchOffSignalDisconnection(const std::string& elementId, const 
 }
 
 void
-DydEvent::addSwitchOffSignalDisconnectionConnect(boost::shared_ptr<dynamicdata::DynamicModelsCollection>& dynamicModels, const std::string& elementId, const std::string& var2) {
+DydEvent::addSwitchOffSignalDisconnectionConnect(boost::shared_ptr<dynamicdata::DynamicModelsCollection>& dynamicModels, const std::string& elementId,
+                                                 const std::string& var2) {
   dynamicModels->addConnect("Disconnect_" + elementId, "event_state1", elementId, var2);
 }
 

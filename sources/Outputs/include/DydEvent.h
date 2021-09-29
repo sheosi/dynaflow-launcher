@@ -55,8 +55,8 @@ class DydEvent {
         filename(filepath),
         contingency(contingency) {}
 
-    std::string basename;     ///< basename for file
-    std::string filename;     ///< filepath for file to write
+    std::string basename;                                                       ///< basename for file
+    std::string filename;                                                       ///< filepath for file to write
     std::shared_ptr<inputs::Contingencies::ContingencyDefinition> contingency;  ///< definition of the contingency
   };
 
@@ -121,9 +121,8 @@ class DydEvent {
    * @param var2Prefix the prefix of the var2 name in the connect depends on the type of equipment ("generator", ...)
    *
    */
-  static void addSwitchOffSignalDisconnectionConnect(boost::shared_ptr<dynamicdata::DynamicModelsCollection>& dynamicModels,
-    const std::string& elementId,
-    const std::string& var2Prefix);
+  static void addSwitchOffSignalDisconnectionConnect(boost::shared_ptr<dynamicdata::DynamicModelsCollection>& dynamicModels, const std::string& elementId,
+                                                     const std::string& var2Prefix);
 
   /**
    * @brief Create black box model for disconnecting an equipment through a change in Network state
@@ -154,7 +153,7 @@ class DydEvent {
   static void addNetworkState12DisconnectionConnect(boost::shared_ptr<dynamicdata::DynamicModelsCollection>& dynamicModels, const std::string& elementId);
 
  private:
-  static const std::string networkModelName_;                       ///< name of the model corresponding to network
+  static const std::string networkModelName_;  ///< name of the model corresponding to network
 
  private:
   DydEventDefinition def_;  ///< Dyd file information
