@@ -40,8 +40,8 @@ class Context {
  public:
   /// @brief The kind of simulation that is requested
   enum class SimulationKind {
-    STEADY_STATE_CALCULATION,  ///< A steady-state calculation
-    SECURITY_ANALYSIS          ///< A security analysis for a given list of contingencies
+    STEADY_STATE_CALCULATION = 0,  ///< A steady-state calculation
+    SECURITY_ANALYSIS              ///< A security analysis for a given list of contingencies
   };
 
   /**

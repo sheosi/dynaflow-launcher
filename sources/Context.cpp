@@ -168,14 +168,17 @@ Context::exportOutputs() {
   // Job
   outputs::Job jobWriter(outputs::Job::JobDefinition(basename_, def_.dynawoLogLevel, config_));
   jobEntry_ = jobWriter.write();
-  if (def_.simulationKind == SimulationKind::SECURITY_ANALYSIS) {
+  switch (def_.simulationKind) {
+  case SimulationKind::SECURITY_ANALYSIS:
     // For security analysis always write the main jobs file, as dynawo-algorithms will need it
     outputs::Job::exportJob(jobEntry_, absolute(def_.networkFilepath), config_.outputDir());
-  } else {
-    // For the rest of simulations, only write jobs file when in DEBUG mode
+    break;
+  default:
+    // For the rest of calculations, only write jobs file when in DEBUG mode
 #if _DEBUG_
     outputs::Job::exportJob(jobEntry_, absolute(def_.networkFilepath), config_.outputDir());
 #endif
+    break;
   }
 
   // Dyd
@@ -268,15 +271,19 @@ Context::execute() {
   // Since DFL traces are persistent, they can be re-used after simulation is performed outside this function
   LOG(info) << MESS(SimulateInfo, basename_) << LOG_ENDL;
 
-  if (def_.simulationKind == SimulationKind::STEADY_STATE_CALCULATION) {
-    // For a power flow calcualtion it is ok to directly run here a single simulation
+  switch (def_.simulationKind) {
+  case SimulationKind::STEADY_STATE_CALCULATION: {
+    // For a power flow calculation it is ok to directly run here a single simulation
     auto simu = boost::make_shared<DYN::Simulation>(jobEntry_, simu_context, networkManager_.dataInterface());
     simu->init();
     simu->simulate();
     simu->terminate();
     simu->clean();
-  } else if (def_.simulationKind == SimulationKind::SECURITY_ANALYSIS) {
+    break;
+  }
+  case SimulationKind::SECURITY_ANALYSIS:
     executeSecurityAnalysis();
+    break;
   }
 }
 
