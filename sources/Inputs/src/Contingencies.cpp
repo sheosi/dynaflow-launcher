@@ -31,8 +31,8 @@ Contingencies::Contingencies(const boost::filesystem::path& filepath) {
   init();
 }
 
-void Contingencies::loadDefinitions(const boost::filesystem::path& filepath)
-{
+void
+Contingencies::loadDefinitions(const boost::filesystem::path& filepath) {
   try {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(filepath.native(), tree);
@@ -64,23 +64,24 @@ void Contingencies::loadDefinitions(const boost::filesystem::path& filepath)
 
     LOG(debug) << MESS(ContingenciesReadingFrom, filepath) << LOG_ENDL;
     for (const boost::property_tree::ptree::value_type& v : tree.get_child("contingencies")) {
-      const boost::property_tree::ptree& ptcontingency = v.second;
-      LOG(debug) << ptcontingency.get<std::string>("id") << LOG_ENDL;
+      const boost::property_tree::ptree& ptContingency = v.second;
+      LOG(debug) << ptContingency.get<std::string>("id") << LOG_ENDL;
 
-      ContingencyDefinition contingency(ptcontingency.get<std::string>("id"));
+      ContingencyDefinition contingency(ptContingency.get<std::string>("id"));
       bool valid = true;
-      for (const boost::property_tree::ptree::value_type& pte : ptcontingency.get_child("elements")) {
-        const auto element_id = pte.second.get<std::string>("id");
-        const auto element_type = pte.second.get<std::string>("type");
-        LOG(debug) << "  " << element_id << " (" << element_type << ")" << LOG_ENDL;
+      for (const boost::property_tree::ptree::value_type& ptElement : ptContingency.get_child("elements")) {
+        const auto elementId = ptElement.second.get<std::string>("id");
+        const auto strElementType = ptElement.second.get<std::string>("type");
+        LOG(debug) << "  " << elementId << " (" << strElementType << ")" << LOG_ENDL;
 
-        if (const auto has_type = elementTypeFromString(element_type)) {
-          ContingencyElementDefinition element(element_id);
-          element.type = *has_type;
+        const auto elementType = elementTypeFromString(strElementType);
+        if (elementType) {
+          ContingencyElementDefinition element(elementId);
+          element.type = *elementType;
           contingency.elements.push_back(element);
         } else {
           valid = false;
-          LOG(warn) << MESS(ContingencyInvalidBadElemType, contingency.id, element_id, element_type) << LOG_ENDL;
+          LOG(warn) << MESS(ContingencyInvalidBadElemType, contingency.id, elementId, strElementType) << LOG_ENDL;
         }
       }
       if (valid) {
@@ -95,13 +96,9 @@ void Contingencies::loadDefinitions(const boost::filesystem::path& filepath)
 
 void
 Contingencies::init() {
-  for (auto c : contingencies_) {
-    for (auto e : c->elements) {
-      if (elementContingencies_.find(e.id) == elementContingencies_.end()) {
-        elementContingencies_.insert({e.id, {c}});
-      } else {
-        elementContingencies_[e.id].push_back(c);
-      }
+  for (const auto& c : contingencies_) {
+    for (const auto& e : c->elements) {
+      elementContingencies_[e.id].push_back(c);
     }
   }
 }
@@ -164,15 +161,14 @@ Contingencies::toString(ElementType type) {
 }
 
 std::string
-Contingencies::toString(ContingencyElementDefinition::ValidationStatus status)
- {
+Contingencies::toString(ContingencyElementDefinition::ValidationStatus status) {
   using Status = ContingencyElementDefinition::ValidationStatus;
   switch (status) {
-    case Status::MAIN_CC_VALID_TYPE:
+  case Status::MAIN_CC_VALID_TYPE:
     return "MAIN_CC_VALID_TYPE";
-    case Status::MAIN_CC_INVALID_TYPE:
+  case Status::MAIN_CC_INVALID_TYPE:
     return "MAIN_CC_INVALID_TYPE";
-    case Status::NOT_IN_NETWORK_OR_NOT_IN_MAIN_CC:
+  case Status::NOT_IN_NETWORK_OR_NOT_IN_MAIN_CC:
     return "NOT_IN_NETWORK_OR_NOT_IN_MAIN_CC";
   }
   return "STATUS_UNKNOWN";
@@ -210,7 +206,7 @@ Contingencies::isValidType(ElementType type, ElementType referenceType) {
 bool
 Contingencies::isValidForSimulation(const ContingencyDefinition& c) {
   // A contigency is valid for simulation if all its elements are in the main connected component and have valid types
-  for (auto e : c.elements) {
+  for (const auto& e : c.elements) {
     if (e.status != ContingencyElementDefinition::ValidationStatus::MAIN_CC_VALID_TYPE) {
       LOG(warn) << MESS(ContingencyInvalidForSimulation, c.id, e.id, toString(e.status)) << LOG_ENDL;
       return false;
