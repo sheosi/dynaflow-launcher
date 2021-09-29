@@ -16,7 +16,6 @@ set(SOURCES
   src/DynamicDataBaseManager.cpp
   src/SettingXmlDocument.cpp
   src/AssemblingXmlDocument.cpp
-  src/Contingencies.cpp
 )
 
 add_library(inputs ${LINK_TYPE} ${SOURCES})
