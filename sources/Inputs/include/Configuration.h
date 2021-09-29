@@ -17,6 +17,7 @@
 #pragma once
 
 #include <boost/filesystem.hpp>
+#include <chrono>
 #include <string>
 
 namespace dfl {
@@ -103,7 +104,7 @@ class Configuration {
    *
    * @returns the start time value
    */
-  float getStartTime() const {
+  const std::chrono::seconds& getStartTime() const {
     return startTime_;
   }
 
@@ -112,7 +113,7 @@ class Configuration {
    *
    * @returns the stop time value
    */
-  float getStopTime() const {
+  const std::chrono::seconds& getStopTime() const {
     return stopTime_;
   }
 
@@ -121,7 +122,7 @@ class Configuration {
    *
    * @returns the time of event value
    */
-  float getTimeOfEvent() const {
+  const std::chrono::seconds& getTimeOfEvent() const {
     return timeOfEvent_;
   }
 
@@ -130,7 +131,7 @@ class Configuration {
    *
    * @returns the number of threads
    */
-  int getNumberOfThreads() const {
+  unsigned int getNumberOfThreads() const {
     return numberOfThreads_;
   }
 
@@ -179,11 +180,11 @@ class Configuration {
   ActivePowerCompensation activePowerCompensation_ = ActivePowerCompensation::PMAX;  ///< Type of active power compensation
   boost::filesystem::path settingFilePath_;                                          ///< setting file path
   boost::filesystem::path assemblingFilePath_;                                       ///< assembling file path
-  float startTime_ = 0;                                                              ///< Moment (in seconds) at which starts the simulation
-  float stopTime_ = 100;                                                             ///< Moment (in seconds) at which ends the simulation
-  // Security Analysis only
-  double timeOfEvent_ = 80.0;  ///< Moment (in seconds) at which the contingencies are simulated
-  int numberOfThreads_ = 4;    ///< The number of threads used to simulate
+  std::chrono::seconds startTime_{0};                                                ///< start time of simulation
+  std::chrono::seconds stopTime_{100};                                               ///< stop time for simulation
+
+  std::chrono::seconds timeOfEvent_{80};  ///< time for contingency simulation (security analysis only)
+  unsigned int numberOfThreads_{4};       ///< The number of threads used in security analysis simulation
 };
 
 }  // namespace inputs

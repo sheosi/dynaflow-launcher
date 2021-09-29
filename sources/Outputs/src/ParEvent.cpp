@@ -40,7 +40,8 @@ static boost::shared_ptr<parameters::Parameter>
 buildParameter(const std::string& name, const T& value) {
   return parameters::ParameterFactory::newParameter(name, value);
 }
-} // namespace helper
+
+}  // namespace helper
 
 ParEvent::ParEvent(ParEventDefinition&& def) : def_{std::forward<ParEventDefinition>(def)} {}
 
@@ -52,11 +53,11 @@ ParEvent::write() {
   auto parametersSets = parameters::ParametersSetCollectionFactory::newCollection();
   for (auto e = def_.contingency->elements.begin(); e != def_.contingency->elements.end(); ++e) {
     if (e->type == Type::BRANCH || e->type == Type::LINE || e->type == Type::TWO_WINDINGS_TRANSFORMER) {
-      parametersSets->addParametersSet(buildBranchDisconnection(e->id, def_.timeEvent));
+      parametersSets->addParametersSet(buildBranchDisconnection(e->id, def_.timeOfEvent));
     } else if (e->type == Type::GENERATOR || e->type == Type::LOAD || e->type == Type::HVDC_LINE) {
-      parametersSets->addParametersSet(buildEventSetPointBooleanDisconnection(e->id, def_.timeEvent));
+      parametersSets->addParametersSet(buildEventSetPointBooleanDisconnection(e->id, def_.timeOfEvent));
     } else {
-      parametersSets->addParametersSet(buildEventSetPointRealDisconnection(e->id, def_.timeEvent));
+      parametersSets->addParametersSet(buildEventSetPointRealDisconnection(e->id, def_.timeOfEvent));
     }
   }
 
@@ -64,30 +65,29 @@ ParEvent::write() {
 }
 
 boost::shared_ptr<parameters::ParametersSet>
-ParEvent::buildBranchDisconnection(const std::string& branchId, double timeEvent) {
+ParEvent::buildBranchDisconnection(const std::string& branchId, const std::chrono::seconds& timeOfEvent) {
   auto set = boost::shared_ptr<parameters::ParametersSet>(new parameters::ParametersSet("Disconnect_" + branchId));
-  set->addParameter(helper::buildParameter("event_tEvent", timeEvent));
+  set->addParameter(helper::buildParameter("event_tEvent", static_cast<double>(timeOfEvent.count())));
   set->addParameter(helper::buildParameter("event_disconnectOrigin", true));
   set->addParameter(helper::buildParameter("event_disconnectExtremity", true));
   return set;
 }
 
 boost::shared_ptr<parameters::ParametersSet>
-ParEvent::buildEventSetPointBooleanDisconnection(const std::string& elementId, double timeEvent) {
+ParEvent::buildEventSetPointBooleanDisconnection(const std::string& elementId, const std::chrono::seconds& timeOfEvent) {
   auto set = boost::shared_ptr<parameters::ParametersSet>(new parameters::ParametersSet("Disconnect_" + elementId));
-  set->addParameter(helper::buildParameter("event_tEvent", timeEvent));
+  set->addParameter(helper::buildParameter("event_tEvent", static_cast<double>(timeOfEvent.count())));
   set->addParameter(helper::buildParameter("event_stateEvent1", true));
   return set;
 }
 
 boost::shared_ptr<parameters::ParametersSet>
-ParEvent::buildEventSetPointRealDisconnection(const std::string& elementId, double timeEvent) {
+ParEvent::buildEventSetPointRealDisconnection(const std::string& elementId, const std::chrono::seconds& timeOfEvent) {
   auto set = boost::shared_ptr<parameters::ParametersSet>(new parameters::ParametersSet("Disconnect_" + elementId));
-  set->addParameter(helper::buildParameter("event_tEvent", timeEvent));
+  set->addParameter(helper::buildParameter("event_tEvent", static_cast<double>(timeOfEvent.count())));
   set->addParameter(helper::buildParameter("event_stateEvent1", 1.0));
   return set;
 }
-
 
 }  // namespace outputs
 }  // namespace dfl

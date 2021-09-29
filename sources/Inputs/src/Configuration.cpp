@@ -64,6 +64,21 @@ updateActivePowerCompensationValue(Configuration::ActivePowerCompensation& activ
     LOG(warn) << MESS(BadActivePowerCompensation, apcString) << LOG_ENDL;
   }
 }
+
+/**
+ * @brief Helper function to update an a std::chrono::seconds value
+ *
+ * @param seconds the value to update
+ * @param tree the element of the boost tree
+ * @param key the key of the parameter to retrieve
+ */
+static void
+updateSeconds(std::chrono::seconds& seconds, const boost::property_tree::ptree& tree, const std::string& key) {
+  auto value_opt = tree.get_child_optional(key);
+  if (value_opt.is_initialized()) {
+    seconds = std::chrono::seconds{value_opt->get_value<unsigned int>()};
+  }
+}
 }  // namespace helper
 
 Configuration::Configuration(const boost::filesystem::path& filepath) {
@@ -92,9 +107,9 @@ Configuration::Configuration(const boost::filesystem::path& filepath) {
     helper::updateValue(dsoVoltageLevel_, config, "DsoVoltageLevel");
     helper::updateValue(settingFilePath_, config, "SettingPath");
     helper::updateValue(assemblingFilePath_, config, "AssemblyPath");
-    helper::updateValue(startTime_, config, "StartTime");
-    helper::updateValue(stopTime_, config, "StopTime");
-    helper::updateValue(timeOfEvent_, config, "sa.TimeOfEvent");
+    helper::updateSeconds(startTime_, config, "StartTime");
+    helper::updateSeconds(stopTime_, config, "StopTime");
+    helper::updateSeconds(timeOfEvent_, config, "sa.TimeOfEvent");
     helper::updateValue(numberOfThreads_, config, "sa.NumberOfThreads");
     helper::updateActivePowerCompensationValue(activePowerCompensation_, config);
   } catch (std::exception& e) {

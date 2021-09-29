@@ -164,10 +164,9 @@ Context::exportOutputs() {
 
   // create output directory
   file::path outputDir(config_.outputDir());
-  outputs::Job::setStartAndDuration(config_.getStartTime(), config_.getStopTime() - config_.getStartTime());
 
   // Job
-  outputs::Job jobWriter(outputs::Job::JobDefinition(basename_, def_.dynawoLogLevel));
+  outputs::Job jobWriter(outputs::Job::JobDefinition(basename_, def_.dynawoLogLevel, config_));
   jobEntry_ = jobWriter.write();
   if (def_.simulationKind == SimulationKind::SECURITY_ANALYSIS) {
     // For security analysis always write the main jobs file, as dynawo-algorithms will need it
@@ -246,7 +245,7 @@ Context::exportOutputsContingency(const std::shared_ptr<inputs::Contingencies::C
 
 #if _DEBUG_
   // A JOBS file for every contingency is produced only in DEBUG mode
-  outputs::Job jobEventWriter(outputs::Job::JobDefinition(basenameEvent, def_.dynawoLogLevel, contingencyId, basename_));
+  outputs::Job jobEventWriter(outputs::Job::JobDefinition(basenameEvent, def_.dynawoLogLevel, config_, contingencyId, basename_));
   boost::shared_ptr<job::JobEntry> jobEvent = jobEventWriter.write();
   jobsEvents_.emplace_back(jobEvent);
   outputs::Job::exportJob(jobEvent, absolute(def_.networkFilepath), config_.outputDir());

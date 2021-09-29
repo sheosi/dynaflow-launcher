@@ -958,7 +958,7 @@ class ContingencyValidationAlgorithm : public NodeAlgorithm {
  public:
   /**
    * @brief Constructor
-   * @param checker The contingencies that will be updated with valid elements found in the network
+   * @param contingencies The contingencies that will be updated with valid elements found in the network
    */
   explicit ContingencyValidationAlgorithm(inputs::Contingencies& contingencies);
 
