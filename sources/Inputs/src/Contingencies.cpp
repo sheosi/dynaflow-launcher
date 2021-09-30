@@ -76,9 +76,7 @@ Contingencies::loadDefinitions(const boost::filesystem::path& filepath) {
 
         const auto elementType = elementTypeFromString(strElementType);
         if (elementType) {
-          ContingencyElementDefinition element(elementId);
-          element.type = *elementType;
-          contingency.elements.push_back(element);
+          contingency.elements.push_back(ContingencyElementDefinition{elementId, *elementType});
         } else {
           valid = false;
           LOG(warn) << MESS(ContingencyInvalidBadElemType, contingency.id, elementId, strElementType) << LOG_ENDL;

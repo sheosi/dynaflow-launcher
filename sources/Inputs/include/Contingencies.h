@@ -58,7 +58,10 @@ class Contingencies {
     /**
      * @brief Constructor
      */
-    explicit ContingencyElementDefinition(const std::string& id) : id(id), status(ValidationStatus::NOT_IN_NETWORK_OR_NOT_IN_MAIN_CC) {}
+    explicit ContingencyElementDefinition(const std::string& id, const ElementType& type) :
+        id(id),
+        type(type),
+        status(ValidationStatus::NOT_IN_NETWORK_OR_NOT_IN_MAIN_CC) {}
 
     std::string id;           ///< id of the element affected by a contingency
     ElementType type;         ///< type of the element affected by the contingency (BRANCH, GENERATOR, LOAD, ...)
