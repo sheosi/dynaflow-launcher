@@ -226,10 +226,10 @@ Context::exportOutputsContingencies() {
 }
 
 void
-Context::exportOutputsContingency(const std::shared_ptr<inputs::Contingencies::ContingencyDefinition>& c) {
+Context::exportOutputsContingency(const std::shared_ptr<inputs::Contingencies::ContingencyDefinition>& contingency) {
   // Prepare a DYD, PAR and JOBS for every contingency
   // The DYD and PAR contain the definition of the events of the contingency
-  const std::string& contingencyId = c->id;
+  const std::string& contingencyId = contingency->id;
 
   // Basename of event-related DYD, PAR and JOBS files
   const auto& basenameEvent = basename_ + "-" + contingencyId;
@@ -237,13 +237,13 @@ Context::exportOutputsContingency(const std::shared_ptr<inputs::Contingencies::C
   // Specific DYD for contingency
   file::path dydEvent(config_.outputDir());
   dydEvent.append(basenameEvent + ".dyd");
-  outputs::DydEvent dydEventWriter(outputs::DydEvent::DydEventDefinition(basenameEvent, dydEvent.generic_string(), c));
+  outputs::DydEvent dydEventWriter(outputs::DydEvent::DydEventDefinition(basenameEvent, dydEvent.generic_string(), contingency));
   dydEventWriter.write();
 
   // Specific PAR for contingency
   file::path parEvent(config_.outputDir());
   parEvent.append(basenameEvent + ".par");
-  outputs::ParEvent parEventWriter(outputs::ParEvent::ParEventDefinition(basenameEvent, parEvent.generic_string(), c, config_.getTimeOfEvent()));
+  outputs::ParEvent parEventWriter(outputs::ParEvent::ParEventDefinition(basenameEvent, parEvent.generic_string(), contingency, config_.getTimeOfEvent()));
   parEventWriter.write();
 
 #if _DEBUG_
