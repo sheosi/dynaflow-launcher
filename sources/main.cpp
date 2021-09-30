@@ -56,7 +56,7 @@ elapsed(const std::chrono::steady_clock::time_point& timePoint) {
   return static_cast<double>(duration.count()) / 1000;  // To have the time in seconds as a double
 }
 
-dfl::Context::SimulationKind
+static dfl::Context::SimulationKind
 getSimulationKind(const dfl::common::Options::RuntimeConfiguration& runtimeConfig) {
   if (runtimeConfig.contingenciesFilePath.empty()) {
     return dfl::Context::SimulationKind::STEADY_STATE_CALCULATION;
@@ -118,7 +118,7 @@ main(int argc, char* argv[]) {
     DYN::InitXerces xerces;
     DYN::InitLibXml2 libxml2;
 
-    dfl::Context::SimulationKind simulationKind = getSimulationKind(runtimeConfig);
+    auto simulationKind = getSimulationKind(runtimeConfig);
     switch (simulationKind) {
     case dfl::Context::SimulationKind::STEADY_STATE_CALCULATION:
       LOG(info) << MESS(InputsSteadyStateInfo, runtimeConfig.networkFilePath, runtimeConfig.configPath) << LOG_ENDL;
@@ -126,8 +126,6 @@ main(int argc, char* argv[]) {
     case dfl::Context::SimulationKind::SECURITY_ANALYSIS:
       LOG(info) << MESS(InputsSecurityAnalysisInfo, runtimeConfig.networkFilePath, runtimeConfig.contingenciesFilePath, runtimeConfig.configPath) << LOG_ENDL;
       break;
-    default:
-      LOG(error) << MESS(SimulationKindUnknown, "") << LOG_ENDL;
     }
 
     boost::filesystem::path parFilesDir(root);

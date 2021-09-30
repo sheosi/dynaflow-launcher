@@ -47,7 +47,6 @@ SimulateInfo                  =     Initializing %1% simulation
 NetworkFileNotFound           =     Network file %1% does not exist
 NetworkHasNoRegulatingGenerator         =     Network file %1% has no generator regulating voltage in the main connex component
 ContingenciesFileNotFound     =     Contingencies file %1% was given but does not exist
-SimulationKindUnknown         =     Simulation kind (steady-state calculation or security analysis) could not be determined %1%
 ContextProcessError           =     Processing of the network %1% failed
 SimulationEnded               =     Simulation %1% ended successfully (wall-time: %2%s)
 DFLEnded                      =     DynaFlowLauncher %1% ended successfully (wall-time: %2%s)
