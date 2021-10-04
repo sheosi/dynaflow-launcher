@@ -74,15 +74,6 @@ class DydEvent {
 
  private:
   /**
-   * @brief Write macro connectors
-   *
-   * Create macro connectors elements
-   *
-   * @returns list of macro connectors
-   */
-  static std::vector<boost::shared_ptr<dynamicdata::MacroConnector>> buildMacroConnectors();
-
-  /**
    * @brief Create black box model for disconnecting a branch
    *
    * @param branchId static identifier of the branch
@@ -151,9 +142,6 @@ class DydEvent {
    *
    */
   static void addNetworkState12DisconnectionConnect(boost::shared_ptr<dynamicdata::DynamicModelsCollection>& dynamicModels, const std::string& elementId);
-
- private:
-  static const std::string networkModelName_;  ///< name of the model corresponding to network
 
  private:
   DydEventDefinition def_;  ///< Dyd file information
