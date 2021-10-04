@@ -15,7 +15,7 @@ add_test(
 # Test will fail because environement variables are not set
 set_tests_properties(MAIN_SA.varEnv PROPERTIES WILL_FAIL TRUE)
 
-macro(DEFINE_LAUNCH_TEST _name)
+macro(DEFINE_LAUNCH_TEST_SA _name)
   add_test(
     # Use some per-module/project prefix so that it is easier to run only tests for this module
     NAME MAIN_SA.${_name}
@@ -32,6 +32,7 @@ macro(DEFINE_LAUNCH_TEST _name)
   set_property(TEST MAIN_SA.${_name} APPEND PROPERTY ENVIRONMENT DYNAWO_IIDM_EXTENSION=${DYNAWO_HOME}/lib/libdynawo_DataInterfaceIIDMExtension.so)
   set_property(TEST MAIN_SA.${_name} APPEND PROPERTY ENVIRONMENT DYNAWO_LIBIIDM_EXTENSIONS=${DYNAWO_HOME}/lib)
   set_property(TEST MAIN_SA.${_name} APPEND PROPERTY ENVIRONMENT PYTHONPATH=${DYNAWO_HOME}/sbin/nrt/nrt_diff)
+  set_property(TEST MAIN_SA.${_name} APPEND PROPERTY ENVIRONMENT DYNAWO_ALGORITHMS_LOCALE="en_GB")
 endmacro()
 
-DEFINE_LAUNCH_TEST(launch)
+DEFINE_LAUNCH_TEST_SA(launch)
