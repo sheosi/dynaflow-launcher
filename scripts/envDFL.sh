@@ -158,6 +158,9 @@ set_environment() {
     export DYNAWO_INSTALL_DIR=$DYNAWO_HOME
     export IIDM_XML_XSD_PATH=$DYNAWO_INSTALL_DIR/share/iidm/xsd
 
+    # dynawo-algorithm vars
+    export DYNAWO_ALGORITHMS_INSTALL_DIR=$DYNAWO_ALGORITHMS_HOME
+
     # dynawo vars that can be replaced by external
     export_var_env_dynawo_with_default DYNAWO_DDB_DIR $DYNAFLOW_LAUNCHER_EXTERNAL_DDB $DYNAWO_INSTALL_DIR/ddb
 
@@ -171,6 +174,7 @@ set_environment() {
 
     # global vars
     ld_library_path_prepend $DYNAWO_INSTALL_DIR/lib         # For Dynawo library
+    ld_library_path_prepend $DYNAWO_ALGORITHMS_INSTALL_DIR/lib         # For Dynawo library
     ld_library_path_prepend $DYNAFLOW_LAUNCHER_HOME/lib64   # For local DFL libraries, used only at runtime in case we compile in shared
     ld_library_path_prepend $DYNAFLOW_LAUNCHER_EXTERNAL_LIBRARIES # To add external model libraries loaded during simulation
 
@@ -372,6 +376,7 @@ case $1 in
         reset_environment_variables || error_exit "Failed to reset environment variables"
         ;;
     tests)
+        env
         cmake_tests || error_exit "Failed to perform tests"
         ;;
     update-references)
