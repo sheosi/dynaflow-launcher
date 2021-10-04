@@ -19,6 +19,7 @@
 
 #include "Constants.h"
 #include "Contingencies.h"
+#include "Par.h"
 
 #include <DYNCommon.h>
 #include <PARParameter.h>
@@ -32,16 +33,6 @@
 
 namespace dfl {
 namespace outputs {
-
-namespace helper {
-
-template<class T>
-static boost::shared_ptr<parameters::Parameter>
-buildParameter(const std::string& name, const T& value) {
-  return parameters::ParameterFactory::newParameter(name, value);
-}
-
-}  // namespace helper
 
 ParEvent::ParEvent(ParEventDefinition&& def) : def_{std::forward<ParEventDefinition>(def)} {}
 

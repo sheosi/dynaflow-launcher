@@ -23,6 +23,7 @@
 
 #include <DYNLineInterface.h>
 #include <PARMacroParameterSet.h>
+#include <PARParameterFactory.h>
 #include <PARParametersSet.h>
 #include <boost/filesystem.hpp>
 #include <boost/shared_ptr.hpp>
@@ -259,6 +260,14 @@ class Par {
  private:
   ParDefinition def_;  ///< PAR file definition
 };
+
+namespace helper {
+template<class T>
+static boost::shared_ptr<parameters::Parameter>
+buildParameter(const std::string& name, const T& value) {
+  return parameters::ParameterFactory::newParameter(name, value);
+}
+}  // namespace helper
 
 }  // namespace outputs
 }  // namespace dfl
