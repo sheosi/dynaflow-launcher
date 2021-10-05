@@ -19,15 +19,11 @@
 
 #include "Constants.h"
 #include "Contingencies.h"
-#include "Par.h"
+#include "ParCommon.hpp"
 
 #include <DYNCommon.h>
-#include <PARParameter.h>
-#include <PARParameterFactory.h>
 #include <PARParametersSetCollection.h>
 #include <PARParametersSetCollectionFactory.h>
-#include <PARReference.h>
-#include <PARReferenceFactory.h>
 #include <PARXmlExporter.h>
 #include <boost/filesystem.hpp>
 

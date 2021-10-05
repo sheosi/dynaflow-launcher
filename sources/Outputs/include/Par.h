@@ -261,13 +261,5 @@ class Par {
   ParDefinition def_;  ///< PAR file definition
 };
 
-namespace helper {
-template<class T>
-static boost::shared_ptr<parameters::Parameter>
-buildParameter(const std::string& name, const T& value) {
-  return parameters::ParameterFactory::newParameter(name, value);
-}
-}  // namespace helper
-
 }  // namespace outputs
 }  // namespace dfl

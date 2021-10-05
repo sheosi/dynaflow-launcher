@@ -20,12 +20,11 @@
 #include "Constants.h"
 #include "Log.h"
 #include "Message.hpp"
+#include "ParCommon.hpp"
 
 #include <DYNCommon.h>
 #include <DYNDataInterface.h>
 #include <DYNNetworkInterface.h>
-#include <PARParameter.h>
-#include <PARParameterFactory.h>
 #include <PARParametersSetCollection.h>
 #include <PARParametersSetCollectionFactory.h>
 #include <PARReference.h>
