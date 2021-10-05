@@ -74,9 +74,9 @@ updateActivePowerCompensationValue(Configuration::ActivePowerCompensation& activ
  */
 static void
 updateSeconds(std::chrono::seconds& seconds, const boost::property_tree::ptree& tree, const std::string& key) {
-  if (tree.get_child_optional(key)) {
-    unsigned int scount;
-    helper::updateValue(scount, tree, key);
+  int scount = INT_MAX;
+  helper::updateValue(scount, tree, key);
+  if (scount != INT_MAX) {
     seconds = std::chrono::seconds(scount);
   }
 }
