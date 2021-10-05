@@ -77,6 +77,14 @@ class Job {
       initFromConfig(config);
     }
 
+    std::string filename;                ///< filename of the job output file
+    std::string dynawoLogLevel;          ///< Dynawo log level, in string representation
+    std::string contingencyId;           ///< Identifier of referred contingency
+    std::string baseFilename;            ///< Name for base case filename if we are defining a jobs file for a contingency
+    std::chrono::seconds startTime{0};   ///< The start time of the simulation
+    std::chrono::seconds stopTime{100};  ///< the constant duration of the simulation in the job
+
+   private:
     /**
      * @brief Initialize additional attributes from configuration
      *
@@ -86,13 +94,6 @@ class Job {
       startTime = config.getStartTime();
       stopTime = config.getStopTime();
     }
-
-    std::string filename;                ///< filename of the job output file
-    std::string dynawoLogLevel;          ///< Dynawo log level, in string representation
-    std::string contingencyId;           ///< Identifier of referred contingency
-    std::string baseFilename;            ///< Name for base case filename if we are defining a jobs file for a contingency
-    std::chrono::seconds startTime{0};   ///< The start time of the simulation
-    std::chrono::seconds stopTime{100};  ///< the constant duration of the simulation in the job
   };
 
  public:
