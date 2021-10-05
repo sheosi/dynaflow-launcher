@@ -66,7 +66,7 @@ updateActivePowerCompensationValue(Configuration::ActivePowerCompensation& activ
 }
 
 /**
- * @brief Helper function to update an a std::chrono::seconds value
+ * @brief Helper function to update a std::chrono::seconds value
  *
  * @param seconds the value to update
  * @param tree the element of the boost tree
@@ -74,9 +74,10 @@ updateActivePowerCompensationValue(Configuration::ActivePowerCompensation& activ
  */
 static void
 updateSeconds(std::chrono::seconds& seconds, const boost::property_tree::ptree& tree, const std::string& key) {
-  auto value_opt = tree.get_child_optional(key);
-  if (value_opt.is_initialized()) {
-    seconds = std::chrono::seconds{value_opt->get_value<unsigned int>()};
+  if (tree.get_child_optional(key)) {
+    unsigned int scount;
+    helper::updateValue(scount, tree, key);
+    seconds = std::chrono::seconds(scount);
   }
 }
 }  // namespace helper
