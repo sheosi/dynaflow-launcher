@@ -27,7 +27,7 @@ namespace outputs {
 
 namespace helper {
 template<class T>
-static boost::shared_ptr<parameters::Parameter>
+boost::shared_ptr<parameters::Parameter>
 buildParameter(const std::string& name, const T& value) {
   return parameters::ParameterFactory::newParameter(name, value);
 }
