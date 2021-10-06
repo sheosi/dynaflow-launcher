@@ -22,6 +22,7 @@
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <limits>
 
 namespace dfl {
 namespace inputs {
@@ -74,9 +75,10 @@ updateActivePowerCompensationValue(Configuration::ActivePowerCompensation& activ
  */
 static void
 updateSeconds(std::chrono::seconds& seconds, const boost::property_tree::ptree& tree, const std::string& key) {
-  int scount = INT_MAX;
+  unsigned int invalid = std::numeric_limits<unsigned int>::max();
+  unsigned int scount = invalid;
   helper::updateValue(scount, tree, key);
-  if (scount != INT_MAX) {
+  if (scount != invalid) {
     seconds = std::chrono::seconds(scount);
   }
 }
