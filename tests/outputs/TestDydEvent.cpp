@@ -8,8 +8,8 @@ testing::Environment* initXmlEnvironment();
 testing::Environment* const env = initXmlEnvironment();
 
 TEST(TestDyd, write) {
-  using ContingencyElement = dfl::inputs::Contingencies::ContingencyElement;
-  using ElementType = dfl::inputs::Contingencies::ElementType;
+  using ContingencyElement = dfl::inputs::ContingencyElement;
+  using ElementType = dfl::inputs::ContingencyElement::Type;
 
   std::string basename = "TestDydEvent";
   std::string dirname = "results";
@@ -22,7 +22,7 @@ TEST(TestDyd, write) {
     boost::filesystem::create_directory(outputPath);
   }
 
-  auto contingency = dfl::inputs::Contingencies::Contingency("TestContingency");
+  auto contingency = dfl::inputs::Contingency("TestContingency");
   contingency.elements = {
       // We need one element per case handled in DydEvent
       ContingencyElement("TestBranch", ElementType::BRANCH),                       // buildBranchDisconnection (branch case)

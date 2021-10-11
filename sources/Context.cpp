@@ -41,7 +41,6 @@
 #include <tuple>
 
 namespace file = boost::filesystem;
-using dfl::inputs::Contingencies;
 
 namespace dfl {
 Context::Context(const ContextDef& def, const inputs::Configuration& config) :
@@ -79,7 +78,9 @@ Context::Context(const ContextDef& def, const inputs::Configuration& config) :
   networkManager_.onNode(algo::LinesByIdAlgorithm(linesById_));
 
   if (def_.simulationKind == SimulationKind::SECURITY_ANALYSIS) {
-    contingencies_ = std::make_shared<const inputs::Contingencies>(def_.contingenciesFilepath);
+    // No need to keep the contingencies manager
+    // It will create the list of contingencies and return it
+    contingencies_ = boost::make_optional(inputs::ContingenciesManager(def_.contingenciesFilepath).get());
   }
 }
 
@@ -122,7 +123,7 @@ Context::process() {
       algo::HVDCDefinitionAlgorithm(hvdcLineDefinitions_, config_.useInfiniteReactiveLimits(), networkManager_.getMapBusVSCConvertersBusId()));
   onNodeOnMainConnexComponent(algo::StaticVarCompensatorAlgorithm(svarcsDefinitions_));
   if (def_.simulationKind == SimulationKind::SECURITY_ANALYSIS) {
-    if (contingencies_ && !(*contingencies_)->get().empty()) {
+    if (contingencies_ && !(*contingencies_)->empty()) {
       validContingencies_ = boost::make_optional(algo::ValidContingencies(*contingencies_));
       onNodeOnMainConnexComponent(algo::ContingencyValidationAlgorithm(*validContingencies_));
     }
@@ -226,7 +227,7 @@ Context::exportOutputs() {
 }
 
 void
-Context::exportOutputsContingency(const inputs::Contingencies::Contingency& contingency) {
+Context::exportOutputsContingency(const inputs::Contingency& contingency) {
   // Prepare a DYD, PAR and JOBS for every contingency
   // The DYD and PAR contain the definition of the events of the contingency
 

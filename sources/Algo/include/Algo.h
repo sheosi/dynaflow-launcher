@@ -958,15 +958,15 @@ class StaticVarCompensatorAlgorithm : public NodeAlgorithm {
  */
 class ValidContingencies {
  public:
-  using ContingencyId = std::string;
-  using ElementId = std::string;
-  using ContingencyRef = std::reference_wrapper<const inputs::Contingencies::Contingency>;
+  using ContingencyId = std::string;                                         ///< Alias for contingency identifier
+  using ElementId = std::string;                                             ///< Alias for element identifier in contingency
+  using ContingencyRef = std::reference_wrapper<const inputs::Contingency>;  ///< Alias for reference to contingency
 
   /**
    * @brief Constructor
-   * @param contingencies The contingencies given in the inputs
+   * @param contingencies The list of contingencies given in the inputs
    */
-  explicit ValidContingencies(std::shared_ptr<const inputs::Contingencies> contingencies);
+  explicit ValidContingencies(std::shared_ptr<const std::vector<inputs::Contingency>> contingencies);
 
   /**
    * @brief Mark the element given by id and type as valid in all contingencies where it is referred
@@ -974,7 +974,7 @@ class ValidContingencies {
    * @param id the id of the element found in the network
    * @param type the type of the element as it has been found in the network
    */
-  void markElementValid(const ElementId& id, inputs::Contingencies::ElementType type);
+  void markElementValid(const ElementId& id, inputs::ContingencyElement::Type type);
 
   /**
    * @brief Keep as valid contingencies only the ones that have all elements marked as valid
@@ -994,10 +994,10 @@ class ValidContingencies {
   using ElementIds = std::unordered_set<ElementId>;                                            ///< Alias for set of element ids
   using ValidatingContingenciesMap = std::unordered_map<ContingencyId, ElementIds>;            ///< Alias for map of contingencies with valid elements found
 
-  std::shared_ptr<const inputs::Contingencies> contingencies_;  ///< Contingencies requested in the inputs
-  ElementContingenciesMap elementContingencies_;                ///< For each element identifier, a list of all the contingencies where it is referenced
-  ValidatingContingenciesMap validatingContingencies_;          ///< All contingencies with valid elements found, indexed by contingencyId
-  std::vector<ContingencyRef> validContingencies_;              ///< Only valid contingencies
+  std::shared_ptr<const std::vector<inputs::Contingency>> contingencies_;  ///< Contingencies requested in the inputs
+  ElementContingenciesMap elementContingencies_;                           ///< For each element identifier, all the contingencies where it is referenced
+  ValidatingContingenciesMap validatingContingencies_;                     ///< All contingencies with valid elements found, indexed by contingencyId
+  std::vector<ContingencyRef> validContingencies_;                         ///< Only valid contingencies
 };
 
 /**

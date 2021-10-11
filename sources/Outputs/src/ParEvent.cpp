@@ -34,7 +34,7 @@ ParEvent::ParEvent(ParEventDefinition&& def) : def_{std::forward<ParEventDefinit
 
 void
 ParEvent::write() {
-  using Type = dfl::inputs::Contingencies::ElementType;
+  using Type = dfl::inputs::ContingencyElement::Type;
   parameters::XmlExporter exporter;
 
   auto parametersSets = parameters::ParametersSetCollectionFactory::newCollection();

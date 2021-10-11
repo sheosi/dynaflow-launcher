@@ -684,7 +684,7 @@ StaticVarCompensatorAlgorithm::operator()(const NodePtr& node) {
 
 void
 ContingencyValidationAlgorithm::operator()(const NodePtr& node) {
-  using Type = inputs::Contingencies::ElementType;
+  using Type = inputs::ContingencyElement::Type;
 
   for (const auto& line : node->lines) {
     validContingencies_.markElementValid(line.lock()->id, Type::LINE);
@@ -726,8 +726,8 @@ ContingencyValidationAlgorithm::operator()(const NodePtr& node) {
   }
 }
 
-ValidContingencies::ValidContingencies(std::shared_ptr<const inputs::Contingencies> contingencies) : contingencies_(contingencies) {
-  for (const auto& c : contingencies_->get()) {
+ValidContingencies::ValidContingencies(std::shared_ptr<const std::vector<inputs::Contingency>> contingencies) : contingencies_(contingencies) {
+  for (const auto& c : *contingencies_) {
     for (const auto& e : c.elements) {
       elementContingencies_[e.id].push_back(std::ref(c));
     }
@@ -735,19 +735,18 @@ ValidContingencies::ValidContingencies(std::shared_ptr<const inputs::Contingenci
 }
 
 void
-ValidContingencies::markElementValid(const ElementId& elementId, inputs::Contingencies::ElementType elementType) {
+ValidContingencies::markElementValid(const ElementId& elementId, inputs::ContingencyElement::Type elementType) {
   const auto& ecs = elementContingencies_.find(elementId);
   if (ecs != elementContingencies_.end()) {
     // For all contingencies where the element is referred ...
     for (const auto& cref : ecs->second) {
-      const dfl::inputs::Contingencies::Contingency& c = cref.get();
+      const dfl::inputs::Contingency& c = cref.get();
       // Find the element inside the input contingency ...
-      auto foundce =
-          std::find_if(c.elements.begin(), c.elements.end(), [elementId](const inputs::Contingencies::ContingencyElement& ce) { return ce.id == elementId; });
-      if (foundce != c.elements.end()) {
+      auto ce = std::find_if(c.elements.begin(), c.elements.end(), [elementId](const inputs::ContingencyElement& ce) { return ce.id == elementId; });
+      if (ce != c.elements.end()) {
         // And check it has been given with a valid type,
         // according to the reference type found in the network
-        if (inputs::Contingencies::isValidType((*foundce).type, elementType)) {
+        if (inputs::ContingencyElement::isValidType((*ce).type, elementType)) {
           // If type is valid, add the element to the list of valid elements found for the contingency
           validatingContingencies_[c.id].insert(elementId);
         }
@@ -759,7 +758,7 @@ ValidContingencies::markElementValid(const ElementId& elementId, inputs::Conting
 void
 ValidContingencies::keepContingenciesWithAllElementsValid() {
   // A contingency is valid for simulation if all its elements have been marked as valid
-  for (const auto& c : contingencies_->get()) {
+  for (const auto& c : *contingencies_) {
     auto vc = validatingContingencies_.find(c.id);
     if (vc == validatingContingencies_.end()) {
       // For this contingency we have not found any valid element

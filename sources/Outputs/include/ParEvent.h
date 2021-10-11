@@ -48,17 +48,16 @@ class ParEvent {
      * @param contingency contingency definition for the event parameters
      * @param timeOfEvent time of event
      */
-    ParEventDefinition(const std::string& base, const std::string& filename, const inputs::Contingencies::Contingency& contingency,
-                       const std::chrono::seconds& timeOfEvent) :
+    ParEventDefinition(const std::string& base, const std::string& filename, const inputs::Contingency& contingency, const std::chrono::seconds& timeOfEvent) :
         basename(base),
         filename(filename),
         contingency(contingency),
         timeOfEvent(timeOfEvent) {}
 
-    std::string basename;                                   ///< basename
-    std::string filename;                                   ///< filename of the output file to write
-    const inputs::Contingencies::Contingency& contingency;  ///< contingency definition for the event parameters
-    std::chrono::seconds timeOfEvent;                       ///< time of event
+    std::string basename;                    ///< basename
+    std::string filename;                    ///< filename of the output file to write
+    const inputs::Contingency& contingency;  ///< contingency definition for the event parameters
+    std::chrono::seconds timeOfEvent;        ///< time of event
   };
 
   /**

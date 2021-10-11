@@ -39,7 +39,7 @@ DydEvent::DydEvent(DydEventDefinition&& def) : def_{std::forward<DydEventDefinit
 
 void
 DydEvent::write() const {
-  using Type = dfl::inputs::Contingencies::ElementType;
+  using Type = dfl::inputs::ContingencyElement::Type;
 
   dynamicdata::XmlExporter exporter;
 

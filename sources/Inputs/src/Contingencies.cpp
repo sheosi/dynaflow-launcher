@@ -26,12 +26,12 @@
 namespace dfl {
 namespace inputs {
 
-Contingencies::Contingencies(const boost::filesystem::path& filepath) {
+ContingenciesManager::ContingenciesManager(const boost::filesystem::path& filepath) {
   load(filepath);
 }
 
 void
-Contingencies::load(const boost::filesystem::path& filepath) {
+ContingenciesManager::load(const boost::filesystem::path& filepath) {
   try {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(filepath.native(), tree);
@@ -62,6 +62,8 @@ Contingencies::load(const boost::filesystem::path& filepath) {
      */
 
     LOG(info) << MESS(ContingenciesReadingFrom, filepath) << LOG_ENDL;
+    contingencies_ = std::make_shared<std::vector<Contingency>>();
+    contingencies_->reserve(tree.get_child("contingencies").size());
     for (const boost::property_tree::ptree::value_type& v : tree.get_child("contingencies")) {
       const boost::property_tree::ptree& ptContingency = v.second;
       LOG(debug) << "Contingency " << ptContingency.get<std::string>("id") << LOG_ENDL;
@@ -73,7 +75,7 @@ Contingencies::load(const boost::filesystem::path& filepath) {
         const auto strElementType = ptElement.second.get<std::string>("type");
         LOG(debug) << "Contingency element " << elementId << " (" << strElementType << ")" << LOG_ENDL;
 
-        const auto elementType = elementTypeFromString(strElementType);
+        const auto elementType = ContingencyElement::typeFromString(strElementType);
         if (elementType) {
           contingency.elements.push_back(ContingencyElement{elementId, *elementType});
         } else {
@@ -82,7 +84,7 @@ Contingencies::load(const boost::filesystem::path& filepath) {
         }
       }
       if (valid) {
-        contingencies_.push_back(contingency);
+        contingencies_->push_back(contingency);
       }
     }
   } catch (std::exception& e) {
@@ -91,71 +93,71 @@ Contingencies::load(const boost::filesystem::path& filepath) {
   }
 }
 
-boost::optional<Contingencies::ElementType>
-Contingencies::elementTypeFromString(const std::string& str) {
+boost::optional<ContingencyElement::Type>
+ContingencyElement::typeFromString(const std::string& str) {
   if (str == "LOAD") {
-    return ElementType::LOAD;
+    return Type::LOAD;
   } else if (str == "GENERATOR") {
-    return ElementType::GENERATOR;
+    return Type::GENERATOR;
   } else if (str == "BRANCH") {
-    return ElementType::BRANCH;
+    return Type::BRANCH;
   } else if (str == "LINE") {
-    return ElementType::LINE;
+    return Type::LINE;
   } else if (str == "TWO_WINDINGS_TRANSFORMER") {
-    return ElementType::TWO_WINDINGS_TRANSFORMER;
+    return Type::TWO_WINDINGS_TRANSFORMER;
   } else if (str == "THREE_WINDINGS_TRANSFORMER") {
-    return ElementType::THREE_WINDINGS_TRANSFORMER;
+    return Type::THREE_WINDINGS_TRANSFORMER;
   } else if (str == "SHUNT_COMPENSATOR") {
-    return ElementType::SHUNT_COMPENSATOR;
+    return Type::SHUNT_COMPENSATOR;
   } else if (str == "STATIC_VAR_COMPENSATOR") {
-    return ElementType::STATIC_VAR_COMPENSATOR;
+    return Type::STATIC_VAR_COMPENSATOR;
   } else if (str == "DANGLING_LINE") {
-    return ElementType::DANGLING_LINE;
+    return Type::DANGLING_LINE;
   } else if (str == "HVDC_LINE") {
-    return ElementType::HVDC_LINE;
+    return Type::HVDC_LINE;
   } else if (str == "BUSBAR_SECTION") {
-    return ElementType::BUSBAR_SECTION;
+    return Type::BUSBAR_SECTION;
   }
   return boost::none;
 }
 
 std::string
-Contingencies::toString(ElementType type) {
+ContingencyElement::toString(Type type) {
   switch (type) {
-  case ElementType::LOAD:
+  case Type::LOAD:
     return "LOAD";
-  case ElementType::GENERATOR:
+  case Type::GENERATOR:
     return "GENERATOR";
-  case ElementType::BRANCH:
+  case Type::BRANCH:
     return "BRANCH";
-  case ElementType::LINE:
+  case Type::LINE:
     return "LINE";
-  case ElementType::TWO_WINDINGS_TRANSFORMER:
+  case Type::TWO_WINDINGS_TRANSFORMER:
     return "TWO_WINDINGS_TRANSFORMER";
-  case ElementType::THREE_WINDINGS_TRANSFORMER:
+  case Type::THREE_WINDINGS_TRANSFORMER:
     return "THREE_WINDINGS_TRANSFORMER";
-  case ElementType::SHUNT_COMPENSATOR:
+  case Type::SHUNT_COMPENSATOR:
     return "SHUNT_COMPENSATOR";
-  case ElementType::STATIC_VAR_COMPENSATOR:
+  case Type::STATIC_VAR_COMPENSATOR:
     return "STATIC_VAR_COMPENSATOR";
-  case ElementType::DANGLING_LINE:
+  case Type::DANGLING_LINE:
     return "DANGLING_LINE";
-  case ElementType::HVDC_LINE:
+  case Type::HVDC_LINE:
     return "HVDC_LINE";
-  case ElementType::BUSBAR_SECTION:
+  case Type::BUSBAR_SECTION:
     return "BUSBAR_SECTION";
   }
-  return "UNKNOWN_TYPE";
+  return "UNKNOWN_ELEMENT_TYPE";
 }
 
 bool
-Contingencies::isValidType(ElementType type, ElementType referenceType) {
-  if (type == ElementType::BRANCH) {
-    if (referenceType == ElementType::LINE || referenceType == ElementType::TWO_WINDINGS_TRANSFORMER) {
+ContingencyElement::isValidType(Type type, Type referenceType) {
+  if (type == Type::BRANCH) {
+    if (referenceType == Type::LINE || referenceType == Type::TWO_WINDINGS_TRANSFORMER) {
       return true;
     }
-  } else if (referenceType == ElementType::BRANCH) {
-    if (type == ElementType::LINE || type == ElementType::TWO_WINDINGS_TRANSFORMER) {
+  } else if (referenceType == Type::BRANCH) {
+    if (type == Type::LINE || type == Type::TWO_WINDINGS_TRANSFORMER) {
       return true;
     }
   }

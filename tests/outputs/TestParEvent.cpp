@@ -9,8 +9,8 @@ testing::Environment* initXmlEnvironment();
 testing::Environment* const env = initXmlEnvironment();
 
 TEST(TestPar, write) {
-  using ContingencyElement = dfl::inputs::Contingencies::ContingencyElement;
-  using ElementType = dfl::inputs::Contingencies::ElementType;
+  using ContingencyElement = dfl::inputs::ContingencyElement;
+  using ElementType = dfl::inputs::ContingencyElement::Type;
 
   std::string basename = "TestParEvent";
   std::string dirname = "results";
@@ -23,7 +23,7 @@ TEST(TestPar, write) {
     boost::filesystem::create_directory(outputPath);
   }
 
-  auto contingency = dfl::inputs::Contingencies::Contingency("TestContingency");
+  auto contingency = dfl::inputs::Contingency("TestContingency");
   contingency.elements = {
       // We need the three of them to check the three cases that can be generated
       ContingencyElement("TestBranch", ElementType::BRANCH),                       // buildBranchDisconnection (branch case)

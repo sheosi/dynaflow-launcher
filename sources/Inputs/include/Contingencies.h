@@ -26,15 +26,14 @@ namespace dfl {
 namespace inputs {
 
 /**
- * @brief Class for Contingencies given as input for a Security Analysis simulation
+ * @brief Contingency elements
  */
-class Contingencies {
- public:
+struct ContingencyElement {
   /**
-   * @brief Enum that defines accepted network element types
+   * @brief Enum with accepted types for the elements in a contingency
    */
-  enum class ElementType {
-    LOAD,
+  enum class Type {
+    LOAD = 0,
     GENERATOR,
     BRANCH,
     LINE,
@@ -48,36 +47,65 @@ class Contingencies {
   };
 
   /**
-   * @brief Contingency Elements
+   * @brief Constructor
+   *
+   * @param id the element id
+   * @param type the element type
    */
-  struct ContingencyElement {
-    /**
-     * @brief Constructor
-     *
-     * @param id the element id
-     * @param type the element type
-     */
-    ContingencyElement(const std::string& id, ElementType type) : id(id), type(type) {}
-
-    std::string id;    ///< id of the element affected by a contingency
-    ElementType type;  ///< type of the element affected by the contingency (BRANCH, GENERATOR, LOAD, ...)
-  };
+  ContingencyElement(const std::string& id, Type type) : id(id), type(type) {}
 
   /**
-   * @brief Contingency
+   * @brief Check if a given type is valid against a reference type
+   *
+   * Used to check element types observed in the network against types used in input contingencies
+   *
+   * @param type a type to check
+   * @param referenceType the reference type to check against
    */
-  struct Contingency {
-    /**
-     * @brief Constructor
-     *
-     * @param id the contingency id
-     */
-    explicit Contingency(const std::string& id) : id(id), elements{} {}
+  static bool isValidType(Type type, Type referenceType);
 
-    std::string id;                            ///< id of the contingency
-    std::vector<ContingencyElement> elements;  ///< elements affected by the contingency
-  };
+  /**
+   * @brief Get type enum value from a string
+   *
+   * Parses a string into its enum value
+   *
+   * @return none if not a valid type, otherwise the enum value
+   */
+  static boost::optional<Type> typeFromString(const std::string& str);
 
+  /**
+   * @brief Type to string
+   *
+   * Transforms a type enum value into its string representation
+   *
+   * @return string representation of element type
+   */
+  static std::string toString(Type type);
+
+  std::string id;  ///< Identifier of an element affected by a contingency
+  Type type;       ///< Type of the element affected by the contingency (BRANCH, GENERATOR, LOAD, ...)
+};
+
+/**
+ * @brief Contingency
+ */
+struct Contingency {
+  /**
+   * @brief Constructor
+   *
+   * @param id the contingency id
+   */
+  explicit Contingency(const std::string& id) : id(id), elements{} {}
+
+  std::string id;                            ///< Identifier of the contingency
+  std::vector<ContingencyElement> elements;  ///< Elements affected by the contingency
+};
+
+/**
+ * @brief Manage the contingencies given as input for a Security Analysis simulation
+ */
+class ContingenciesManager {
+ public:
   /**
    * @brief Constructor
    *
@@ -85,33 +113,7 @@ class Contingencies {
    *
    * @param filepath the JSON contingencies file to use
    */
-  explicit Contingencies(const boost::filesystem::path& filepath);
-
-  /**
-   * @brief Check if a network element type is valid against an element type defined in contingencies
-   *
-   * @param type a type to check
-   * @param referenceType the reference type to check against
-   */
-  static bool isValidType(ElementType type, ElementType referenceType);
-
-  /**
-   * @brief Get element type enum from a string
-   *
-   * Parses a string into its 'ElementType' enum value
-   *
-   * @return none if not a valid type, otherwise the enum value
-   */
-  static boost::optional<ElementType> elementTypeFromString(const std::string& str);
-
-  /**
-   * @brief ElementType to string
-   *
-   * Transforms an ElementType enum into its string representation
-   *
-   * @return string representation of element type
-   */
-  static std::string toString(ElementType type);
+  explicit ContingenciesManager(const boost::filesystem::path& filepath);
 
   /**
    * @brief List of contingencies
@@ -120,7 +122,7 @@ class Contingencies {
    *
    * @return contingency list
    */
-  const std::vector<Contingency>& get() const {
+  std::shared_ptr<const std::vector<Contingency>> get() const {
     return contingencies_;
   }
 
@@ -128,7 +130,7 @@ class Contingencies {
   /// @brief Load contingencies from an input file
   void load(const boost::filesystem::path& filepath);
 
-  std::vector<Contingency> contingencies_;  ///< Contingencies obtained from input file
+  std::shared_ptr<std::vector<Contingency>> contingencies_;  ///< Contingencies obtained from input file
 };
 
 }  // namespace inputs

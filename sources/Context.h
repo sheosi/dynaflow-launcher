@@ -160,8 +160,8 @@ class Context {
   algo::LinesByIdDefinitions linesById_;                                 ///< Lines by ids definition
   algo::StaticVarCompensatorDefinitions svarcsDefinitions_;              ///< Static var compensators definitions to use
 
-  boost::optional<std::shared_ptr<const inputs::Contingencies>> contingencies_;  ///< contingencies requested for simulation in a Security Analysis
-  boost::optional<algo::ValidContingencies> validContingencies_;                 ///< contingencies accepted for simulation in a Security Analyasis
+  boost::optional<std::shared_ptr<const std::vector<inputs::Contingency>>> contingencies_;  ///< contingencies requested for simulation in a Security Analysis
+  boost::optional<algo::ValidContingencies> validContingencies_;                            ///< contingencies accepted for simulation in a Security Analyasis
 
   boost::shared_ptr<job::JobEntry> jobEntry_;                 ///< Dynawo job entry
   std::vector<boost::shared_ptr<job::JobEntry>> jobsEvents_;  ///< Dynawo job entries for contingencies
@@ -173,6 +173,6 @@ class Context {
   void executeSecurityAnalysis();
 
   /// @brief Prepare the output files required to simulate a given contingency
-  void exportOutputsContingency(const inputs::Contingencies::Contingency& c);
+  void exportOutputsContingency(const inputs::Contingency& c);
 };
 }  // namespace dfl
