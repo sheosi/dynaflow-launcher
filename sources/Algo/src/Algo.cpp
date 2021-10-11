@@ -682,50 +682,104 @@ StaticVarCompensatorAlgorithm::operator()(const NodePtr& node) {
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-ContingencyValidationAlgorithm::ContingencyValidationAlgorithm(inputs::Contingencies& contingencies) : contingencies_(contingencies) {}
-
 void
 ContingencyValidationAlgorithm::operator()(const NodePtr& node) {
   using Type = inputs::Contingencies::ElementType;
 
   for (const auto& line : node->lines) {
-    contingencies_.markElementValid(line.lock()->id, Type::LINE);
+    validContingencies_.markElementValid(line.lock()->id, Type::LINE);
   }
   for (const auto& trans_ptr : node->tfos) {
     const auto& trans = trans_ptr.lock();
     switch (trans->nodes.size()) {
     case 2:
-      contingencies_.markElementValid(trans->id, Type::TWO_WINDINGS_TRANSFORMER);
+      validContingencies_.markElementValid(trans->id, Type::TWO_WINDINGS_TRANSFORMER);
       break;
     case 3:
-      contingencies_.markElementValid(trans->id, Type::TWO_WINDINGS_TRANSFORMER);
+      validContingencies_.markElementValid(trans->id, Type::TWO_WINDINGS_TRANSFORMER);
       break;
     default:
       throw std::logic_error("Unexpected size of transformer");
     }
   }
   for (const auto& converter : node->converters) {
-    contingencies_.markElementValid(converter.lock()->hvdcLine->id, Type::HVDC_LINE);
+    validContingencies_.markElementValid(converter.lock()->hvdcLine->id, Type::HVDC_LINE);
   }
   for (const auto& load : node->loads) {
-    contingencies_.markElementValid(load.id, Type::LOAD);
+    validContingencies_.markElementValid(load.id, Type::LOAD);
   }
   for (const auto& generator : node->generators) {
-    contingencies_.markElementValid(generator.id, Type::GENERATOR);
+    validContingencies_.markElementValid(generator.id, Type::GENERATOR);
   }
   for (const auto& shunt : node->shunts) {
-    contingencies_.markElementValid(shunt.id, Type::SHUNT_COMPENSATOR);
+    validContingencies_.markElementValid(shunt.id, Type::SHUNT_COMPENSATOR);
   }
   for (const auto& dline : node->danglingLines) {
-    contingencies_.markElementValid(dline.id, Type::DANGLING_LINE);
+    validContingencies_.markElementValid(dline.id, Type::DANGLING_LINE);
   }
   for (const auto& staticVarComp : node->svarcs) {
-    contingencies_.markElementValid(staticVarComp.id, Type::STATIC_VAR_COMPENSATOR);
+    LOG(info) << "luma markElementValid static var compensator " << staticVarComp.id << LOG_ENDL;
+    validContingencies_.markElementValid(staticVarComp.id, Type::STATIC_VAR_COMPENSATOR);
   }
   for (const auto& busbarsection : node->busBarSections) {
-    contingencies_.markElementValid(busbarsection.id, Type::BUSBAR_SECTION);
+    validContingencies_.markElementValid(busbarsection.id, Type::BUSBAR_SECTION);
   }
 }
+
+ValidContingencies::ValidContingencies(std::shared_ptr<const inputs::Contingencies> contingencies) : contingencies_(contingencies) {
+  for (const auto& c : contingencies_->get()) {
+    for (const auto& e : c.elements) {
+      elementContingencies_[e.id].push_back(std::ref(c));
+    }
+  }
+}
+
+void
+ValidContingencies::markElementValid(const ElementId& elementId, inputs::Contingencies::ElementType elementType) {
+  const auto& ecs = elementContingencies_.find(elementId);
+  if (ecs != elementContingencies_.end()) {
+    // For all contingencies where the element is referred ...
+    for (const auto& cref : ecs->second) {
+      const dfl::inputs::Contingencies::Contingency& c = cref.get();
+      // Find the element inside the input contingency ...
+      auto foundce =
+          std::find_if(c.elements.begin(), c.elements.end(), [elementId](const inputs::Contingencies::ContingencyElement& ce) { return ce.id == elementId; });
+      if (foundce != c.elements.end()) {
+        // And check it has been given with a valid type,
+        // according to the reference type found in the network
+        if (inputs::Contingencies::isValidType((*foundce).type, elementType)) {
+          // If type is valid, add the element to the list of valid elements found for the contingency
+          validatingContingencies_[c.id].insert(elementId);
+        }
+      }
+    }
+  }
+}
+
+void
+ValidContingencies::keepContingenciesWithAllElementsValid() {
+  // A contingency is valid for simulation if all its elements have been marked as valid
+  for (const auto& c : contingencies_->get()) {
+    auto vc = validatingContingencies_.find(c.id);
+    if (vc == validatingContingencies_.end()) {
+      // For this contingency we have not found any valid element
+      LOG(warn) << MESS(ContingencyInvalidForSimulationNoValidElements, c.id) << LOG_ENDL;
+    } else {
+      bool valid = true;
+      // Iterate over all the elements in the input contingency
+      for (const auto& e : c.elements) {
+        // Check that the element has been marked as valid
+        if ((*vc).second.find(e.id) == (*vc).second.end()) {
+          LOG(warn) << MESS(ContingencyInvalidForSimulation, c.id, e.id) << LOG_ENDL;
+          valid = false;
+        }
+      }
+      if (valid) {
+        validContingencies_.push_back(c);
+      }
+    }
+  }
+}  // namespace algo
 
 }  // namespace algo
 }  // namespace dfl

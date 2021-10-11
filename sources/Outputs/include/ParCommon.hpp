@@ -9,7 +9,7 @@
 //
 
 /**
- * @file  ParCommon.h
+ * @file  ParCommon.hpp
  *
  * @brief Dynaflow launcher common methods for handling Parameters
  *

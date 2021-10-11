@@ -38,7 +38,7 @@ ParEvent::write() {
   parameters::XmlExporter exporter;
 
   auto parametersSets = parameters::ParametersSetCollectionFactory::newCollection();
-  for (const auto& e : def_.contingency->elements) {
+  for (const auto& e : def_.contingency.elements) {
     switch (e.type) {
     case Type::BRANCH:
     case Type::LINE:

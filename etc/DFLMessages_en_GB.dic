@@ -57,5 +57,6 @@ FilesEnd                      =     End of files generation (wall-time: %1%s)
 ContingenciesReadingFrom      =     Reading contingencies from %1% ...
 ContingenciesReadError        =     Error while reading contingencies file %1%: %2%
 ContingencyInvalidBadElemType =     Contingency %1% is invalid: element %2% has an unknown type "%3%"
-ContingencyInvalidForSimulation =     Contingency %1% is invalid for simulation. Element %2% is invalid, reason: "%3%"
+ContingencyInvalidForSimulation =     Contingency %1% is invalid for simulation. Element %2% is not in main connected component or has an invalid type
+ContingencyInvalidForSimulationNoValidElements =     Contingency %1% is invalid for simulation. All elements are invalid (not in main connected component or invalid type)
 ContingencySimulationDefined  =     Contingency simulation defined for %1%

@@ -51,7 +51,7 @@ DydEvent::write() const {
   dynamicModels->addMacroConnector(connector);
 
   // models and connections
-  for (const auto& e : def_.contingency->elements) {
+  for (const auto& e : def_.contingency.elements) {
     switch (e.type) {
     case Type::BRANCH:
     case Type::LINE:

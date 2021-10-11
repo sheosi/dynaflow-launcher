@@ -27,18 +27,17 @@ namespace dfl {
 namespace inputs {
 
 Contingencies::Contingencies(const boost::filesystem::path& filepath) {
-  loadDefinitions(filepath);
-  init();
+  load(filepath);
 }
 
 void
-Contingencies::loadDefinitions(const boost::filesystem::path& filepath) {
+Contingencies::load(const boost::filesystem::path& filepath) {
   try {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(filepath.native(), tree);
 
     /**
-     * The JSON format for contingency definitions is inherited from Powsybl:
+     * The JSON format for contingencies is inherited from Powsybl:
      *
      * {
      *   "version" : "1.0",
@@ -62,42 +61,33 @@ Contingencies::loadDefinitions(const boost::filesystem::path& filepath) {
      * }
      */
 
-    LOG(debug) << MESS(ContingenciesReadingFrom, filepath) << LOG_ENDL;
+    LOG(info) << MESS(ContingenciesReadingFrom, filepath) << LOG_ENDL;
     for (const boost::property_tree::ptree::value_type& v : tree.get_child("contingencies")) {
       const boost::property_tree::ptree& ptContingency = v.second;
-      LOG(debug) << ptContingency.get<std::string>("id") << LOG_ENDL;
+      LOG(debug) << "Contingency " << ptContingency.get<std::string>("id") << LOG_ENDL;
 
-      ContingencyDefinition contingency(ptContingency.get<std::string>("id"));
+      Contingency contingency(ptContingency.get<std::string>("id"));
       bool valid = true;
       for (const boost::property_tree::ptree::value_type& ptElement : ptContingency.get_child("elements")) {
         const auto elementId = ptElement.second.get<std::string>("id");
         const auto strElementType = ptElement.second.get<std::string>("type");
-        LOG(debug) << "  " << elementId << " (" << strElementType << ")" << LOG_ENDL;
+        LOG(debug) << "Contingency element " << elementId << " (" << strElementType << ")" << LOG_ENDL;
 
         const auto elementType = elementTypeFromString(strElementType);
         if (elementType) {
-          contingency.elements.push_back(ContingencyElementDefinition{elementId, *elementType});
+          contingency.elements.push_back(ContingencyElement{elementId, *elementType});
         } else {
           valid = false;
           LOG(warn) << MESS(ContingencyInvalidBadElemType, contingency.id, elementId, strElementType) << LOG_ENDL;
         }
       }
       if (valid) {
-        contingencies_.push_back(std::make_shared<ContingencyDefinition>(contingency));
+        contingencies_.push_back(contingency);
       }
     }
   } catch (std::exception& e) {
     LOG(error) << MESS(ContingenciesReadError, filepath, e.what()) << LOG_ENDL;
     std::exit(EXIT_FAILURE);
-  }
-}
-
-void
-Contingencies::init() {
-  for (const auto& c : contingencies_) {
-    for (const auto& e : c->elements) {
-      elementContingencies_[e.id].push_back(c);
-    }
   }
 }
 
@@ -158,59 +148,18 @@ Contingencies::toString(ElementType type) {
   return "UNKNOWN_TYPE";
 }
 
-std::string
-Contingencies::toString(ContingencyElementDefinition::ValidationStatus status) {
-  using Status = ContingencyElementDefinition::ValidationStatus;
-  switch (status) {
-  case Status::MAIN_CC_VALID_TYPE:
-    return "MAIN_CC_VALID_TYPE";
-  case Status::MAIN_CC_INVALID_TYPE:
-    return "MAIN_CC_INVALID_TYPE";
-  case Status::NOT_IN_NETWORK_OR_NOT_IN_MAIN_CC:
-    return "NOT_IN_NETWORK_OR_NOT_IN_MAIN_CC";
-  }
-  return "STATUS_UNKNOWN";
-}
-
-void
-Contingencies::markElementValid(const std::string id, ElementType type) {
-  using Status = ContingencyElementDefinition::ValidationStatus;
-  auto ec = elementContingencies_.find(id);
-  if (ec != elementContingencies_.end()) {
-    // For all contingencies where the element is referred ...
-    for (auto& c : ec->second) {
-      for (auto& e : c->elements) {
-        // Find the contingency definition for the element inside the contingency ...
-        if (e.id == id) {
-          // And check it has been given with a valid type,
-          // according to the reference type found in the Network
-          e.status = isValidType(e.type, type) ? Status::MAIN_CC_VALID_TYPE : Status::MAIN_CC_INVALID_TYPE;
-        }
-      }
-    }
-  }
-}
-
 bool
 Contingencies::isValidType(ElementType type, ElementType referenceType) {
   if (type == ElementType::BRANCH) {
-    return referenceType == ElementType::LINE || referenceType == ElementType::TWO_WINDINGS_TRANSFORMER;
+    if (referenceType == ElementType::LINE || referenceType == ElementType::TWO_WINDINGS_TRANSFORMER) {
+      return true;
+    }
   } else if (referenceType == ElementType::BRANCH) {
-    return type == ElementType::LINE || type == ElementType::TWO_WINDINGS_TRANSFORMER;
-  }
-  return type == referenceType;
-}
-
-bool
-Contingencies::isValidForSimulation(const ContingencyDefinition& c) {
-  // A contigency is valid for simulation if all its elements are in the main connected component and have valid types
-  for (const auto& e : c.elements) {
-    if (e.status != ContingencyElementDefinition::ValidationStatus::MAIN_CC_VALID_TYPE) {
-      LOG(warn) << MESS(ContingencyInvalidForSimulation, c.id, e.id, toString(e.status)) << LOG_ENDL;
-      return false;
+    if (type == ElementType::LINE || type == ElementType::TWO_WINDINGS_TRANSFORMER) {
+      return true;
     }
   }
-  return true;
+  return type == referenceType;
 }
 
 }  // namespace inputs

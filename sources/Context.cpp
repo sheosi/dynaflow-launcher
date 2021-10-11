@@ -49,7 +49,6 @@ Context::Context(const ContextDef& def, const inputs::Configuration& config) :
     networkManager_(def.networkFilepath),
     dynamicDataBaseManager_(def.settingFilePath, def.assemblingFilePath),
     config_(config),
-    contingencies_(),
     basename_{},
     slackNode_{},
     slackNodeOrigin_{SlackNodeOrigin::ALGORITHM},
@@ -80,7 +79,7 @@ Context::Context(const ContextDef& def, const inputs::Configuration& config) :
   networkManager_.onNode(algo::LinesByIdAlgorithm(linesById_));
 
   if (def_.simulationKind == SimulationKind::SECURITY_ANALYSIS) {
-    contingencies_ = dfl::inputs::Contingencies(def_.contingenciesFilepath);
+    contingencies_ = std::make_shared<const inputs::Contingencies>(def_.contingenciesFilepath);
   }
 }
 
@@ -116,21 +115,27 @@ Context::process() {
     }
   }
 
-  if (!contingencies_.definitions().empty()) {
-    onNodeOnMainConnexComponent(algo::ContingencyValidationAlgorithm(contingencies_));
-  }
   onNodeOnMainConnexComponent(algo::GeneratorDefinitionAlgorithm(generators_, busesWithDynamicModel_, networkManager_.getMapBusGeneratorsBusId(),
                                                                  config_.useInfiniteReactiveLimits(), networkManager_.dataInterface()->getServiceManager()));
   onNodeOnMainConnexComponent(algo::LoadDefinitionAlgorithm(loads_, config_.getDsoVoltageLevel()));
   onNodeOnMainConnexComponent(
       algo::HVDCDefinitionAlgorithm(hvdcLineDefinitions_, config_.useInfiniteReactiveLimits(), networkManager_.getMapBusVSCConvertersBusId()));
   onNodeOnMainConnexComponent(algo::StaticVarCompensatorAlgorithm(svarcsDefinitions_));
+  if (def_.simulationKind == SimulationKind::SECURITY_ANALYSIS) {
+    if (contingencies_ && !(*contingencies_)->get().empty()) {
+      validContingencies_ = boost::make_optional(algo::ValidContingencies(*contingencies_));
+      onNodeOnMainConnexComponent(algo::ContingencyValidationAlgorithm(*validContingencies_));
+    }
+  }
   walkNodesMain();
 
   if (generators_.empty()) {
     // no generator is regulating the voltage in the main connex component : do not simulate
     LOG(error) << MESS(NetworkHasNoRegulatingGenerator, def_.networkFilepath) << LOG_ENDL;
     return false;
+  }
+  if (validContingencies_) {
+    (*validContingencies_).keepContingenciesWithAllElementsValid();
   }
 
   return true;
@@ -212,27 +217,21 @@ Context::exportOutputs() {
   diagramWriter.write();
 
   if (def_.simulationKind == SimulationKind::SECURITY_ANALYSIS) {
-    exportOutputsContingencies();
-  }
-}
-
-void
-Context::exportOutputsContingencies() {
-  for (const auto& c : contingencies_.definitions()) {
-    if (contingencies_.isValidForSimulation(*c)) {
-      exportOutputsContingency(c);
+    if (validContingencies_) {
+      for (const auto& c : (*validContingencies_).get()) {
+        exportOutputsContingency(c);
+      }
     }
   }
 }
 
 void
-Context::exportOutputsContingency(const std::shared_ptr<inputs::Contingencies::ContingencyDefinition>& contingency) {
+Context::exportOutputsContingency(const inputs::Contingencies::Contingency& contingency) {
   // Prepare a DYD, PAR and JOBS for every contingency
   // The DYD and PAR contain the definition of the events of the contingency
-  const std::string& contingencyId = contingency->id;
 
   // Basename of event-related DYD, PAR and JOBS files
-  const auto& basenameEvent = basename_ + "-" + contingencyId;
+  const auto& basenameEvent = basename_ + "-" + contingency.id;
 
   // Specific DYD for contingency
   file::path dydEvent(config_.outputDir());
@@ -248,7 +247,7 @@ Context::exportOutputsContingency(const std::shared_ptr<inputs::Contingencies::C
 
 #if _DEBUG_
   // A JOBS file for every contingency is produced only in DEBUG mode
-  outputs::Job jobEventWriter(outputs::Job::JobDefinition(basenameEvent, def_.dynawoLogLevel, config_, contingencyId, basename_));
+  outputs::Job jobEventWriter(outputs::Job::JobDefinition(basenameEvent, def_.dynawoLogLevel, config_, contingency.id, basename_));
   boost::shared_ptr<job::JobEntry> jobEvent = jobEventWriter.write();
   jobsEvents_.emplace_back(jobEvent);
   outputs::Job::exportJob(jobEvent, absolute(def_.networkFilepath), config_.outputDir());
@@ -296,13 +295,13 @@ Context::executeSecurityAnalysis() {
   auto baseCase = boost::make_shared<DYNAlgorithms::Scenario>();
   baseCase->setId("BaseCase");
   scenarios->addScenario(baseCase);
-  for (const auto& c : contingencies_.definitions()) {
-    if (contingencies_.isValidForSimulation(*c)) {
+  if (validContingencies_) {
+    for (const auto& c : (*validContingencies_).get()) {
       auto scenario = boost::make_shared<DYNAlgorithms::Scenario>();
-      scenario->setId(c->id);
-      scenario->setDydFile(basename_ + "-" + c->id + ".dyd");
+      scenario->setId(c.get().id);
+      scenario->setDydFile(basename_ + "-" + c.get().id + ".dyd");
       scenarios->addScenario(scenario);
-      LOG(info) << MESS(ContingencySimulationDefined, c->id) << LOG_ENDL;
+      LOG(info) << MESS(ContingencySimulationDefined, c.get().id) << LOG_ENDL;
     }
   }
   // Use dynawo-algorithms Systematic Analysis Launcher to simulate all the scenarios

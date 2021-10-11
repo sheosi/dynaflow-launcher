@@ -24,8 +24,9 @@
 
 namespace dfl {
 namespace inputs {
+
 /**
- * @brief Class for dynaflow launcher contingencies definition
+ * @brief Class for Contingencies given as input for a Security Analysis simulation
  */
 class Contingencies {
  public:
@@ -47,77 +48,52 @@ class Contingencies {
   };
 
   /**
-   * @brief Contingency element definition
+   * @brief Contingency Elements
    */
-  struct ContingencyElementDefinition {
-    /**
-     * @brief The validation status of the contingency element
-     */
-    enum class ValidationStatus { NOT_IN_NETWORK_OR_NOT_IN_MAIN_CC, MAIN_CC_INVALID_TYPE, MAIN_CC_VALID_TYPE };
-
+  struct ContingencyElement {
     /**
      * @brief Constructor
+     *
+     * @param id the element id
+     * @param type the element type
      */
-    explicit ContingencyElementDefinition(const std::string& id, const ElementType& type) :
-        id(id),
-        type(type),
-        status(ValidationStatus::NOT_IN_NETWORK_OR_NOT_IN_MAIN_CC) {}
+    ContingencyElement(const std::string& id, ElementType type) : id(id), type(type) {}
 
-    std::string id;           ///< id of the element affected by a contingency
-    ElementType type;         ///< type of the element affected by the contingency (BRANCH, GENERATOR, LOAD, ...)
-    ValidationStatus status;  ///< validation status of the element affected by the contingency
+    std::string id;    ///< id of the element affected by a contingency
+    ElementType type;  ///< type of the element affected by the contingency (BRANCH, GENERATOR, LOAD, ...)
   };
 
   /**
-   * @brief Contingency definition
+   * @brief Contingency
    */
-  struct ContingencyDefinition {
+  struct Contingency {
     /**
      * @brief Constructor
+     *
+     * @param id the contingency id
      */
-    explicit ContingencyDefinition(const std::string& id) : id(id), elements{} {}
+    explicit Contingency(const std::string& id) : id(id), elements{} {}
 
-    std::string id;                                      ///< id of the contingency
-    std::vector<ContingencyElementDefinition> elements;  ///< elements affected by the contingency
+    std::string id;                            ///< id of the contingency
+    std::vector<ContingencyElement> elements;  ///< elements affected by the contingency
   };
 
   /**
    * @brief Constructor
    *
-   * Empty list of contingencies
-   */
-  Contingencies() {}
-
-  /**
-   * @brief Constructor
-   *
-   * Load contingency definitions from file. Exit the program on error in parsing the file
+   * Load contingency from file. Exit the program on error in parsing the file
    *
    * @param filepath the JSON contingencies file to use
    */
   explicit Contingencies(const boost::filesystem::path& filepath);
 
   /**
-   * @brief Definitions
+   * @brief Check if a network element type is valid against an element type defined in contingencies
    *
-   * Obtain a reference to the contingency definitions
-   *
-   * @return reference to contingency definitions
+   * @param type a type to check
+   * @param referenceType the reference type to check against
    */
-  const std::vector<std::shared_ptr<ContingencyDefinition>>& definitions() const {
-    return contingencies_;
-  }
-
-  /**
-   * @brief Mark the element given by id and type as valid in all contingencies where it is referred
-   *
-   * @param id the id of the element found in the snetwork
-   * @param type the type of the element as it has been found in the network
-   */
-  void markElementValid(const std::string id, ElementType type);
-
-  /// @brief Check that a contingency can be simulated by Dynawo
-  static bool isValidForSimulation(const ContingencyDefinition& c);
+  static bool isValidType(ElementType type, ElementType referenceType);
 
   /**
    * @brief Get element type enum from a string
@@ -137,24 +113,22 @@ class Contingencies {
    */
   static std::string toString(ElementType type);
 
-  /// @brief Validation status to string
-  static std::string toString(ContingencyElementDefinition::ValidationStatus status);
+  /**
+   * @brief List of contingencies
+   *
+   * Obtain the list of contingencies defined in the input
+   *
+   * @return contingency list
+   */
+  const std::vector<Contingency>& get() const {
+    return contingencies_;
+  }
 
  private:
-  /// @brief Load contingency definitions from an input file
-  void loadDefinitions(const boost::filesystem::path& filepath);
+  /// @brief Load contingencies from an input file
+  void load(const boost::filesystem::path& filepath);
 
-  /// @brief Complete initializations after definitions have been read
-  void init();
-
-  /// @brief Check if a network element type is valid against an element type defined in contingencies
-  static bool isValidType(ElementType type, ElementType referenceType);
-
-  /// @brief Contingency definitions received as input
-  std::vector<std::shared_ptr<ContingencyDefinition>> contingencies_;
-
-  /// @brief For each element identifier, a list of all the contingencies where it is referenced
-  std::unordered_map<std::string, std::vector<std::shared_ptr<ContingencyDefinition>>> elementContingencies_;
+  std::vector<Contingency> contingencies_;  ///< Contingencies obtained from input file
 };
 
 }  // namespace inputs

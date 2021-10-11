@@ -9,7 +9,7 @@ testing::Environment* initXmlEnvironment();
 testing::Environment* const env = initXmlEnvironment();
 
 TEST(TestPar, write) {
-  using ContingencyElementDefinition = dfl::inputs::Contingencies::ContingencyElementDefinition;
+  using ContingencyElement = dfl::inputs::Contingencies::ContingencyElement;
   using ElementType = dfl::inputs::Contingencies::ElementType;
 
   std::string basename = "TestParEvent";
@@ -23,12 +23,12 @@ TEST(TestPar, write) {
     boost::filesystem::create_directory(outputPath);
   }
 
-  auto contingency = std::make_shared<dfl::inputs::Contingencies::ContingencyDefinition>("TestContingency");
-  contingency->elements = {
+  auto contingency = dfl::inputs::Contingencies::Contingency("TestContingency");
+  contingency.elements = {
       // We need the three of them to check the three cases that can be generated
-      ContingencyElementDefinition("TestBranch", ElementType::BRANCH),                       // buildBranchDisconnection (branch case)
-      ContingencyElementDefinition("TestGenerator", ElementType::GENERATOR),                 // buildEventSetPointBooleanDisconnection
-      ContingencyElementDefinition("TestShuntCompensator", ElementType::SHUNT_COMPENSATOR),  // buildEventSetPointRealDisconnection (general case)
+      ContingencyElement("TestBranch", ElementType::BRANCH),                       // buildBranchDisconnection (branch case)
+      ContingencyElement("TestGenerator", ElementType::GENERATOR),                 // buildEventSetPointBooleanDisconnection
+      ContingencyElement("TestShuntCompensator", ElementType::SHUNT_COMPENSATOR),  // buildEventSetPointRealDisconnection (general case)
   };
 
   outputPath.append(filename);

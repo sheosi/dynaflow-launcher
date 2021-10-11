@@ -8,7 +8,7 @@ testing::Environment* initXmlEnvironment();
 testing::Environment* const env = initXmlEnvironment();
 
 TEST(TestDyd, write) {
-  using ContingencyElementDefinition = dfl::inputs::Contingencies::ContingencyElementDefinition;
+  using ContingencyElement = dfl::inputs::Contingencies::ContingencyElement;
   using ElementType = dfl::inputs::Contingencies::ElementType;
 
   std::string basename = "TestDydEvent";
@@ -22,14 +22,14 @@ TEST(TestDyd, write) {
     boost::filesystem::create_directory(outputPath);
   }
 
-  auto contingency = std::make_shared<dfl::inputs::Contingencies::ContingencyDefinition>("TestContingency");
-  contingency->elements = {
+  auto contingency = dfl::inputs::Contingencies::Contingency("TestContingency");
+  contingency.elements = {
       // We need one element per case handled in DydEvent
-      ContingencyElementDefinition("TestBranch", ElementType::BRANCH),                       // buildBranchDisconnection (branch case)
-      ContingencyElementDefinition("TestGenerator", ElementType::GENERATOR),                 // signal: "generator_switchOffSignal2"
-      ContingencyElementDefinition("TestLoad", ElementType::LOAD),                           // signal: "switchOff2"
-      ContingencyElementDefinition("TestHvdcLine", ElementType::HVDC_LINE),                  // signal: "hvdc_switchOffSignal2"
-      ContingencyElementDefinition("TestShuntCompensator", ElementType::SHUNT_COMPENSATOR),  // buildNetworkStateDisconnection (general case)
+      ContingencyElement("TestBranch", ElementType::BRANCH),                       // buildBranchDisconnection (branch case)
+      ContingencyElement("TestGenerator", ElementType::GENERATOR),                 // signal: "generator_switchOffSignal2"
+      ContingencyElement("TestLoad", ElementType::LOAD),                           // signal: "switchOff2"
+      ContingencyElement("TestHvdcLine", ElementType::HVDC_LINE),                  // signal: "hvdc_switchOffSignal2"
+      ContingencyElement("TestShuntCompensator", ElementType::SHUNT_COMPENSATOR),  // buildNetworkStateDisconnection (general case)
   };
 
   outputPath.append(filename);
