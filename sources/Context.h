@@ -166,9 +166,6 @@ class Context {
   boost::shared_ptr<job::JobEntry> jobEntry_;                 ///< Dynawo job entry
   std::vector<boost::shared_ptr<job::JobEntry>> jobsEvents_;  ///< Dynawo job entries for contingencies
 
-  /// @brief Initialization of additional instances of network manager
-  void initNetworkManager(dfl::inputs::NetworkManager& networkManager, std::vector<std::shared_ptr<inputs::Node>>& mainConnexNodes);
-
   /// @brief Execute security analysis by running simulations for the base case and all the valid contingencies
   void executeSecurityAnalysis();
 
