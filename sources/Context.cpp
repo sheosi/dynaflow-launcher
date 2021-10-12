@@ -312,7 +312,7 @@ Context::executeSecurityAnalysis() {
   auto saLauncher = boost::make_shared<DYNAlgorithms::SystematicAnalysisLauncher>();
   saLauncher->setMultipleJobs(multipleJobs);
   saLauncher->setOutputFile("sa.zip");
-  saLauncher->setDirectory(config_.outputDir().native());
+  saLauncher->setDirectory(config_.outputDir().generic_string());
   saLauncher->setNbThreads(config_.getNumberOfThreads());
   saLauncher->init();
   saLauncher->launch();
