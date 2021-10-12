@@ -739,7 +739,7 @@ ValidContingencies::markElementValid(const ElementId& elementId, inputs::Conting
   if (ecs != elementContingencies_.end()) {
     // For all contingencies where the element is referred ...
     for (const auto& cref : ecs->second) {
-      const dfl::inputs::Contingency& c = cref.get();
+      const auto& c = cref.get();
       // Find the element inside the input contingency ...
       auto ce = std::find_if(c.elements.begin(), c.elements.end(), [elementId](const inputs::ContingencyElement& ce) { return ce.id == elementId; });
       if (ce != c.elements.end()) {
