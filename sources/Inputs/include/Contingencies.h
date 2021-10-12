@@ -55,14 +55,14 @@ struct ContingencyElement {
   ContingencyElement(const std::string& id, Type type) : id(id), type(type) {}
 
   /**
-   * @brief Check if a given type is valid against a reference type
+   * @brief Check if a given type is compatible with a reference type
    *
    * Used to check element types observed in the network against types used in input contingencies
    *
    * @param type a type to check
    * @param referenceType the reference type to check against
    */
-  static bool isValidType(Type type, Type referenceType);
+  static bool isCompatible(Type type, Type referenceType);
 
   /**
    * @brief Get type enum value from a string
@@ -82,8 +82,8 @@ struct ContingencyElement {
    */
   static std::string toString(Type type);
 
-  std::string id;  ///< Identifier of an element affected by a contingency
-  Type type;       ///< Type of the element affected by the contingency (BRANCH, GENERATOR, LOAD, ...)
+  const std::string id;  ///< Identifier of an element affected by a contingency
+  const Type type;       ///< Type of the element affected by the contingency (BRANCH, GENERATOR, LOAD, ...)
 };
 
 /**
@@ -97,7 +97,7 @@ struct Contingency {
    */
   explicit Contingency(const std::string& id) : id(id), elements{} {}
 
-  std::string id;                            ///< Identifier of the contingency
+  const std::string id;                      ///< Identifier of the contingency
   std::vector<ContingencyElement> elements;  ///< Elements affected by the contingency
 };
 

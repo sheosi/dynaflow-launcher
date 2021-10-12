@@ -151,7 +151,7 @@ ContingencyElement::toString(Type type) {
 }
 
 bool
-ContingencyElement::isValidType(Type type, Type referenceType) {
+ContingencyElement::isCompatible(Type type, Type referenceType) {
   if (type == Type::BRANCH) {
     if (referenceType == Type::LINE || referenceType == Type::TWO_WINDINGS_TRANSFORMER) {
       return true;

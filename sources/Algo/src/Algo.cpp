@@ -745,7 +745,7 @@ ValidContingencies::markElementValid(const ElementId& elementId, inputs::Conting
       if (ce != c.elements.end()) {
         // And check it has been given with a valid type,
         // according to the reference type found in the network
-        if (inputs::ContingencyElement::isValidType((*ce).type, elementType)) {
+        if (inputs::ContingencyElement::isCompatible((*ce).type, elementType)) {
           // If type is valid, add the element to the list of valid elements found for the contingency
           validatingContingencies_[c.id].insert(elementId);
         }

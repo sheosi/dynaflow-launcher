@@ -24,12 +24,10 @@ TEST(TestPar, write) {
   }
 
   auto contingency = dfl::inputs::Contingency("TestContingency");
-  contingency.elements = {
-      // We need the three of them to check the three cases that can be generated
-      ContingencyElement("TestBranch", ElementType::BRANCH),                       // buildBranchDisconnection (branch case)
-      ContingencyElement("TestGenerator", ElementType::GENERATOR),                 // buildEventSetPointBooleanDisconnection
-      ContingencyElement("TestShuntCompensator", ElementType::SHUNT_COMPENSATOR),  // buildEventSetPointRealDisconnection (general case)
-  };
+  // We need the three of them to check the three cases that can be generated
+  contingency.elements.emplace_back("TestBranch", ElementType::BRANCH);                       // buildBranchDisconnection (branch case)
+  contingency.elements.emplace_back("TestGenerator", ElementType::GENERATOR);                 // buildEventSetPointBooleanDisconnection
+  contingency.elements.emplace_back("TestShuntCompensator", ElementType::SHUNT_COMPENSATOR);  // buildEventSetPointRealDisconnection (general case)
 
   outputPath.append(filename);
   dfl::outputs::ParEvent par(dfl::outputs::ParEvent::ParEventDefinition(basename, outputPath.generic_string(), contingency, std::chrono::seconds(80)));

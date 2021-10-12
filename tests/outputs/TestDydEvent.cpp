@@ -7,7 +7,7 @@ testing::Environment* initXmlEnvironment();
 
 testing::Environment* const env = initXmlEnvironment();
 
-TEST(TestDyd, write) {
+TEST(TestDydEvent, write) {
   using ContingencyElement = dfl::inputs::ContingencyElement;
   using ElementType = dfl::inputs::ContingencyElement::Type;
 
@@ -23,14 +23,12 @@ TEST(TestDyd, write) {
   }
 
   auto contingency = dfl::inputs::Contingency("TestContingency");
-  contingency.elements = {
-      // We need one element per case handled in DydEvent
-      ContingencyElement("TestBranch", ElementType::BRANCH),                       // buildBranchDisconnection (branch case)
-      ContingencyElement("TestGenerator", ElementType::GENERATOR),                 // signal: "generator_switchOffSignal2"
-      ContingencyElement("TestLoad", ElementType::LOAD),                           // signal: "switchOff2"
-      ContingencyElement("TestHvdcLine", ElementType::HVDC_LINE),                  // signal: "hvdc_switchOffSignal2"
-      ContingencyElement("TestShuntCompensator", ElementType::SHUNT_COMPENSATOR),  // buildNetworkStateDisconnection (general case)
-  };
+  // We need one element per case handled in DydEvent
+  contingency.elements.emplace_back("TestBranch", ElementType::BRANCH);                       // buildBranchDisconnection (branch case)
+  contingency.elements.emplace_back("TestGenerator", ElementType::GENERATOR);                 // signal: "generator_switchOffSignal2"
+  contingency.elements.emplace_back("TestLoad", ElementType::LOAD);                           // signal: "switchOff2"
+  contingency.elements.emplace_back("TestHvdcLine", ElementType::HVDC_LINE);                  // signal: "hvdc_switchOffSignal2"
+  contingency.elements.emplace_back("TestShuntCompensator", ElementType::SHUNT_COMPENSATOR);  // buildNetworkStateDisconnection (general case)
 
   outputPath.append(filename);
   dfl::outputs::DydEvent dyd(dfl::outputs::DydEvent::DydEventDefinition(basename, outputPath.generic_string(), contingency));
