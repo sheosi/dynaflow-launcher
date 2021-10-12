@@ -170,6 +170,8 @@ class Configuration {
   }
 
  private:
+  using seconds = std::chrono::seconds;
+
   bool useInfiniteReactiveLimits_ = false;                                           ///< infinite reactive limits
   bool isPSTRegulationOn_ = true;                                                    ///< PST regulation on
   bool isSVCRegulationOn_ = true;                                                    ///< SVC regulation on
@@ -180,11 +182,11 @@ class Configuration {
   ActivePowerCompensation activePowerCompensation_ = ActivePowerCompensation::PMAX;  ///< Type of active power compensation
   boost::filesystem::path settingFilePath_;                                          ///< setting file path
   boost::filesystem::path assemblingFilePath_;                                       ///< assembling file path
-  std::chrono::seconds startTime_{0};                                                ///< start time of simulation
-  std::chrono::seconds stopTime_{100};                                               ///< stop time for simulation
+  seconds startTime_ = seconds(0);                                                   ///< start time of simulation
+  seconds stopTime_ = seconds(100);                                                  ///< stop time for simulation
 
-  std::chrono::seconds timeOfEvent_{80};  ///< time for contingency simulation (security analysis only)
-  unsigned int numberOfThreads_{4};       ///< The number of threads used in security analysis simulation
+  seconds timeOfEvent_ = seconds(80);  ///< time for contingency simulation (security analysis only)
+  unsigned int numberOfThreads_ = 4;   ///< The number of threads used in security analysis simulation
 };
 
 }  // namespace inputs
