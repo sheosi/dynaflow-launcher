@@ -266,13 +266,13 @@ Context::execute() {
   simu_context->setInputDirectory(path.generic_string());
   simu_context->setWorkingDirectory(config_.outputDir().generic_string());
 
-  // This shall be the last log performed before building simulation,
-  // because simulation constructor will re-initialize traces for Dynawo
-  // Since DFL traces are persistent, they can be re-used after simulation is performed outside this function
-  LOG(info) << MESS(SimulateInfo, basename_) << LOG_ENDL;
-
   switch (def_.simulationKind) {
   case SimulationKind::STEADY_STATE_CALCULATION: {
+    // This shall be the last log performed before building simulation,
+    // because simulation constructor will re-initialize traces for Dynawo
+    // Since DFL traces are persistent, they can be re-used after simulation is performed outside this function
+    LOG(info) << MESS(SimulateInfo, basename_) << LOG_ENDL;
+
     // For a power flow calculation it is ok to directly run here a single simulation
     auto simu = boost::make_shared<DYN::Simulation>(jobEntry_, simu_context, networkManager_.dataInterface());
     simu->init();
@@ -282,6 +282,7 @@ Context::execute() {
     break;
   }
   case SimulationKind::SECURITY_ANALYSIS:
+    LOG(info) << MESS(SecurityAnalysisSimulationInfo, basename_, def_.contingenciesFilepath) << LOG_ENDL;
     executeSecurityAnalysis();
     break;
   }
