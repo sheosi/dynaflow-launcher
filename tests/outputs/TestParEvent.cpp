@@ -8,7 +8,7 @@ testing::Environment* initXmlEnvironment();
 
 testing::Environment* const env = initXmlEnvironment();
 
-TEST(TestPar, write) {
+TEST(TestParEvent, write) {
   using ContingencyElement = dfl::inputs::ContingencyElement;
   using ElementType = dfl::inputs::ContingencyElement::Type;
 
