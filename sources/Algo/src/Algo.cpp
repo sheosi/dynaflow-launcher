@@ -718,7 +718,6 @@ ContingencyValidationAlgorithm::operator()(const NodePtr& node) {
     validContingencies_.markElementValid(dline.id, Type::DANGLING_LINE);
   }
   for (const auto& staticVarComp : node->svarcs) {
-    LOG(info) << "luma markElementValid static var compensator " << staticVarComp.id << LOG_ENDL;
     validContingencies_.markElementValid(staticVarComp.id, Type::STATIC_VAR_COMPENSATOR);
   }
   for (const auto& busbarsection : node->busBarSections) {
