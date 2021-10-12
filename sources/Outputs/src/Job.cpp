@@ -80,18 +80,18 @@ Job::writeSolver() const {
 boost::shared_ptr<job::ModelerEntry>
 Job::writeModeler() const {
   auto modeler = job::ModelerEntryFactory::newInstance();
-  if (def_.contingencyId.empty()) {
-    modeler->setCompileDir("outputs/compilation");
+  if (def_.contingencyId) {
+    modeler->setCompileDir("outputs-" + def_.contingencyId.get() + "/compilation");
   } else {
-    modeler->setCompileDir("outputs-" + def_.contingencyId + "/compilation");
+    modeler->setCompileDir("outputs/compilation");
   }
 
   auto models = job::DynModelsEntryFactory::newInstance();
   models->setDydFile(def_.filename + ".dyd");
   modeler->addDynModelsEntry(models);
-  if (!def_.contingencyId.empty()) {
+  if (def_.baseFilename) {
     auto modelsBase = job::DynModelsEntryFactory::newInstance();
-    modelsBase->setDydFile(def_.baseFilename + ".dyd");
+    modelsBase->setDydFile(def_.baseFilename.get() + ".dyd");
     modeler->addDynModelsEntry(modelsBase);
   }
 
@@ -121,10 +121,10 @@ Job::writeSimulation() const {
 boost::shared_ptr<job::OutputsEntry>
 Job::writeOutputs() const {
   auto output = job::OutputsEntryFactory::newInstance();
-  if (def_.contingencyId.empty()) {
-    output->setOutputsDirectory("outputs");
+  if (def_.contingencyId) {
+    output->setOutputsDirectory("outputs-" + def_.contingencyId.get());
   } else {
-    output->setOutputsDirectory("outputs-" + def_.contingencyId);
+    output->setOutputsDirectory("outputs");
   }
 
   auto log = job::LogsEntryFactory::newInstance();
