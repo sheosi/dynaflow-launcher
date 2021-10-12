@@ -170,7 +170,7 @@ class Configuration {
   }
 
  private:
-  using seconds = std::chrono::seconds;
+  using seconds = std::chrono::seconds;  ///< Alias for seconds
 
   bool useInfiniteReactiveLimits_ = false;                                           ///< infinite reactive limits
   bool isPSTRegulationOn_ = true;                                                    ///< PST regulation on

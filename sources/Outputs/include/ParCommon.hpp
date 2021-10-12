@@ -26,6 +26,12 @@ namespace dfl {
 namespace outputs {
 
 namespace helper {
+/**
+ * @brief Helper function to build a Dynawo parameter
+ *
+ * @param name the parameter name
+ * @param value the value of the parameter
+ */
 template<class T>
 boost::shared_ptr<parameters::Parameter>
 buildParameter(const std::string& name, const T& value) {
