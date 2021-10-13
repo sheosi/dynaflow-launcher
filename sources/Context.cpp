@@ -168,20 +168,7 @@ Context::exportOutputs() {
   file::path outputDir(config_.outputDir());
 
   // Job
-  outputs::Job jobWriter(outputs::Job::JobDefinition(basename_, def_.dynawoLogLevel, config_));
-  jobEntry_ = jobWriter.write();
-  switch (def_.simulationKind) {
-  case SimulationKind::SECURITY_ANALYSIS:
-    // For security analysis always write the main jobs file, as dynawo-algorithms will need it
-    outputs::Job::exportJob(jobEntry_, absolute(def_.networkFilepath), config_.outputDir());
-    break;
-  default:
-    // For the rest of calculations, only write jobs file when in DEBUG mode
-#if _DEBUG_
-    outputs::Job::exportJob(jobEntry_, absolute(def_.networkFilepath), config_.outputDir());
-#endif
-    break;
-  }
+  exportOutputJob();
 
   // Dyd
   file::path dydOutput(config_.outputDir());
@@ -214,10 +201,34 @@ Context::exportOutputs() {
   diagramWriter.write();
 
   if (def_.simulationKind == SimulationKind::SECURITY_ANALYSIS) {
-    if (validContingencies_) {
-      for (const auto& c : validContingencies_->get()) {
-        exportOutputsContingency(c);
-      }
+    exportOutputsContingencies();
+  }
+}
+
+void
+Context::exportOutputJob() {
+  outputs::Job jobWriter(outputs::Job::JobDefinition(basename_, def_.dynawoLogLevel, config_));
+  jobEntry_ = jobWriter.write();
+
+  switch (def_.simulationKind) {
+  case SimulationKind::SECURITY_ANALYSIS:
+    // For security analysis always export the main jobs file, as dynawo-algorithms will need it
+    outputs::Job::exportJob(jobEntry_, absolute(def_.networkFilepath), config_.outputDir());
+    break;
+  default:
+    // For the rest of calculations, only export the jobs file when in DEBUG mode
+#if _DEBUG_
+    outputs::Job::exportJob(jobEntry_, absolute(def_.networkFilepath), config_.outputDir());
+#endif
+    break;
+  }
+}
+
+void
+Context::exportOutputsContingencies() {
+  if (validContingencies_) {
+    for (const auto& c : validContingencies_->get()) {
+      exportOutputsContingency(c);
     }
   }
 }

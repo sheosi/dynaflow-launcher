@@ -168,6 +168,12 @@ class Context {
   /// @brief Execute security analysis by running simulations for the base case and all the valid contingencies
   void executeSecurityAnalysis();
 
+  /// @brief Prepare the job file
+  void exportOutputJob();
+
+  /// @brief Prepare the output files required to simulate the valid contingencies
+  void exportOutputsContingencies();
+
   /// @brief Prepare the output files required to simulate a given contingency
   void exportOutputsContingency(const inputs::Contingency& c);
 };
