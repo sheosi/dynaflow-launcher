@@ -966,7 +966,7 @@ class ValidContingencies {
    * @brief Constructor
    * @param contingencies The list of contingencies given in the inputs
    */
-  explicit ValidContingencies(std::shared_ptr<const std::vector<inputs::Contingency>> contingencies);
+  explicit ValidContingencies(const std::vector<inputs::Contingency>& contingencies);
 
   /**
    * @brief Mark the element given by id and type as valid in all contingencies where it is referred
@@ -990,14 +990,15 @@ class ValidContingencies {
   }
 
  private:
+  using ContingenciesRef = std::reference_wrapper<const std::vector<inputs::Contingency>>;     ///< Alias for a reference to the list of contingencies
   using ElementContingenciesMap = std::unordered_map<ElementId, std::vector<ContingencyRef>>;  ///< Alias for map of element contingencies
   using ElementIds = std::unordered_set<ElementId>;                                            ///< Alias for set of element ids
   using ValidatingContingenciesMap = std::unordered_map<ContingencyId, ElementIds>;            ///< Alias for map of contingencies with valid elements found
 
-  std::shared_ptr<const std::vector<inputs::Contingency>> contingencies_;  ///< Contingencies requested in the inputs
-  ElementContingenciesMap elementContingencies_;                           ///< For each element identifier, all the contingencies where it is referenced
-  ValidatingContingenciesMap validatingContingencies_;                     ///< All contingencies with valid elements found, indexed by contingencyId
-  std::vector<ContingencyRef> validContingencies_;                         ///< Only valid contingencies
+  ContingenciesRef contingencies_;                      ///< Contingencies requested in the inputs
+  ElementContingenciesMap elementContingencies_;        ///< For each element identifier, all the contingencies where it is referenced
+  ValidatingContingenciesMap validatingContingencies_;  ///< All contingencies with valid elements found, indexed by contingencyId
+  std::vector<ContingencyRef> validContingencies_;      ///< Only valid contingencies
 };
 
 /**

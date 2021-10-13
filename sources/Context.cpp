@@ -47,6 +47,7 @@ Context::Context(const ContextDef& def, const inputs::Configuration& config) :
     def_(def),
     networkManager_(def.networkFilepath),
     dynamicDataBaseManager_(def.settingFilePath, def.assemblingFilePath),
+    contingenciesManager_(def.contingenciesFilePath),
     config_(config),
     basename_{},
     slackNode_{},
@@ -76,12 +77,6 @@ Context::Context(const ContextDef& def, const inputs::Configuration& config) :
   networkManager_.onNode(algo::DynModelAlgorithm(dynamicModels_, dynamicDataBaseManager_));
   networkManager_.onNode(algo::ShuntCounterAlgorithm(counters_));
   networkManager_.onNode(algo::LinesByIdAlgorithm(linesById_));
-
-  if (def_.simulationKind == SimulationKind::SECURITY_ANALYSIS) {
-    // No need to keep the contingencies manager
-    // It will create the list of contingencies and return it
-    contingencies_ = boost::make_optional(inputs::ContingenciesManager(def_.contingenciesFilepath).get());
-  }
 }
 
 bool
@@ -123,8 +118,9 @@ Context::process() {
       algo::HVDCDefinitionAlgorithm(hvdcLineDefinitions_, config_.useInfiniteReactiveLimits(), networkManager_.getMapBusVSCConvertersBusId()));
   onNodeOnMainConnexComponent(algo::StaticVarCompensatorAlgorithm(svarcsDefinitions_));
   if (def_.simulationKind == SimulationKind::SECURITY_ANALYSIS) {
-    if (contingencies_ && !(*contingencies_)->empty()) {
-      validContingencies_ = boost::make_optional(algo::ValidContingencies(*contingencies_));
+    const auto& contingencies = contingenciesManager_.get();
+    if (!contingencies.empty()) {
+      validContingencies_ = boost::make_optional(algo::ValidContingencies(contingencies));
       onNodeOnMainConnexComponent(algo::ContingencyValidationAlgorithm(*validContingencies_));
     }
   }
@@ -136,7 +132,7 @@ Context::process() {
     return false;
   }
   if (validContingencies_) {
-    (*validContingencies_).keepContingenciesWithAllElementsValid();
+    validContingencies_->keepContingenciesWithAllElementsValid();
   }
 
   return true;
@@ -219,7 +215,7 @@ Context::exportOutputs() {
 
   if (def_.simulationKind == SimulationKind::SECURITY_ANALYSIS) {
     if (validContingencies_) {
-      for (const auto& c : (*validContingencies_).get()) {
+      for (const auto& c : validContingencies_->get()) {
         exportOutputsContingency(c);
       }
     }
@@ -282,7 +278,7 @@ Context::execute() {
     break;
   }
   case SimulationKind::SECURITY_ANALYSIS:
-    LOG(info) << MESS(SecurityAnalysisSimulationInfo, basename_, def_.contingenciesFilepath) << LOG_ENDL;
+    LOG(info) << MESS(SecurityAnalysisSimulationInfo, basename_, def_.contingenciesFilePath) << LOG_ENDL;
     executeSecurityAnalysis();
     break;
   }
@@ -298,7 +294,7 @@ Context::executeSecurityAnalysis() {
   baseCase->setId("BaseCase");
   scenarios->addScenario(baseCase);
   if (validContingencies_) {
-    for (const auto& c : (*validContingencies_).get()) {
+    for (const auto& c : validContingencies_->get()) {
       auto scenario = boost::make_shared<DYNAlgorithms::Scenario>();
       scenario->setId(c.get().id);
       scenario->setDydFile(basename_ + "-" + c.get().id + ".dyd");

@@ -122,7 +122,7 @@ class ContingenciesManager {
    *
    * @return contingency list
    */
-  std::shared_ptr<const std::vector<Contingency>> get() const {
+  const std::vector<Contingency>& get() const {
     return contingencies_;
   }
 
@@ -130,7 +130,7 @@ class ContingenciesManager {
   /// @brief Load contingencies from an input file
   void load(const boost::filesystem::path& filepath);
 
-  std::shared_ptr<std::vector<Contingency>> contingencies_;  ///< Contingencies obtained from input file
+  std::vector<Contingency> contingencies_;  ///< Contingencies obtained from input file
 };
 
 }  // namespace inputs

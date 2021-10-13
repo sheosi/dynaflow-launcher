@@ -725,8 +725,8 @@ ContingencyValidationAlgorithm::operator()(const NodePtr& node) {
   }
 }
 
-ValidContingencies::ValidContingencies(std::shared_ptr<const std::vector<inputs::Contingency>> contingencies) : contingencies_(contingencies) {
-  for (const auto& c : *contingencies_) {
+ValidContingencies::ValidContingencies(const std::vector<inputs::Contingency>& contingencies) : contingencies_(std::ref(contingencies)) {
+  for (const auto& c : contingencies_.get()) {
     for (const auto& e : c.elements) {
       elementContingencies_[e.id].push_back(std::ref(c));
     }
@@ -757,7 +757,7 @@ ValidContingencies::markElementValid(const ElementId& elementId, inputs::Conting
 void
 ValidContingencies::keepContingenciesWithAllElementsValid() {
   // A contingency is valid for simulation if all its elements have been marked as valid
-  for (const auto& c : *contingencies_) {
+  for (const auto& c : contingencies_.get()) {
     auto vc = validatingContingencies_.find(c.id);
     if (vc == validatingContingencies_.end()) {
       // For this contingency we have not found any valid element

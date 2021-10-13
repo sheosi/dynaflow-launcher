@@ -27,7 +27,9 @@ namespace dfl {
 namespace inputs {
 
 ContingenciesManager::ContingenciesManager(const boost::filesystem::path& filepath) {
-  load(filepath);
+  if (!filepath.empty()) {
+    load(filepath);
+  }
 }
 
 void
@@ -62,17 +64,16 @@ ContingenciesManager::load(const boost::filesystem::path& filepath) {
      */
 
     LOG(info) << MESS(ContingenciesReadingFrom, filepath) << LOG_ENDL;
-    contingencies_ = std::make_shared<std::vector<Contingency>>();
-    contingencies_->reserve(tree.get_child("contingencies").size());
-    for (const boost::property_tree::ptree::value_type& v : tree.get_child("contingencies")) {
-      const boost::property_tree::ptree& ptContingency = v.second;
-      LOG(debug) << "Contingency " << ptContingency.get<std::string>("id") << LOG_ENDL;
+    contingencies_.reserve(tree.get_child("contingencies").size());
+    for (const auto& ptContingency : tree.get_child("contingencies")) {
+      const auto& contingencyId = ptContingency.second.get<std::string>("id");
+      LOG(debug) << "Contingency " << contingencyId << LOG_ENDL;
 
-      Contingency contingency(ptContingency.get<std::string>("id"));
+      Contingency contingency(contingencyId);
       bool valid = true;
-      for (const boost::property_tree::ptree::value_type& ptElement : ptContingency.get_child("elements")) {
-        const auto elementId = ptElement.second.get<std::string>("id");
-        const auto strElementType = ptElement.second.get<std::string>("type");
+      for (const auto& ptElement : ptContingency.second.get_child("elements")) {
+        const auto& elementId = ptElement.second.get<std::string>("id");
+        const auto& strElementType = ptElement.second.get<std::string>("type");
         LOG(debug) << "Contingency element " << elementId << " (" << strElementType << ")" << LOG_ENDL;
 
         const auto elementType = ContingencyElement::typeFromString(strElementType);
@@ -84,7 +85,7 @@ ContingenciesManager::load(const boost::filesystem::path& filepath) {
         }
       }
       if (valid) {
-        contingencies_->push_back(contingency);
+        contingencies_.push_back(contingency);
       }
     }
   } catch (std::exception& e) {
