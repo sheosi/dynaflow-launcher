@@ -20,6 +20,7 @@
 #include "Configuration.h"
 
 #include <JOBJobEntry.h>
+#include <boost/optional.hpp>
 #include <chrono>
 #include <string>
 
@@ -36,13 +37,15 @@ class Job {
    * @brief Job definition on DFL point of view
    */
   struct JobDefinition {
+    using seconds = std::chrono::seconds;  ///< Alias for seconds
+
     /**
      * @brief Constructor
      *
      * @param filename output filename
      * @param lvl dynawo log level
      */
-    JobDefinition(const std::string& filename, const std::string& lvl) : filename(filename), dynawoLogLevel(lvl), contingencyId{}, baseFilename{} {}
+    JobDefinition(const std::string& filename, const std::string& lvl) : filename(filename), dynawoLogLevel(lvl) {}
 
     /**
      * @brief Constructor
@@ -51,11 +54,7 @@ class Job {
      * @param lvl dynawo log level
      * @param config configuration
      */
-    JobDefinition(const std::string& filename, const std::string& lvl, const dfl::inputs::Configuration& config) :
-        filename(filename),
-        dynawoLogLevel(lvl),
-        contingencyId{},
-        baseFilename{} {
+    JobDefinition(const std::string& filename, const std::string& lvl, const dfl::inputs::Configuration& config) : filename(filename), dynawoLogLevel(lvl) {
       initFromConfig(config);
     }
 
@@ -77,13 +76,14 @@ class Job {
       initFromConfig(config);
     }
 
-    std::string filename;                ///< filename of the job output file
-    std::string dynawoLogLevel;          ///< Dynawo log level, in string representation
-    std::string contingencyId;           ///< Identifier of referred contingency
-    std::string baseFilename;            ///< Name for base case filename if we are defining a jobs file for a contingency
-    std::chrono::seconds startTime{0};   ///< The start time of the simulation
-    std::chrono::seconds stopTime{100};  ///< the constant duration of the simulation in the job
+    std::string filename;                        ///< filename of the job output file
+    std::string dynawoLogLevel;                  ///< Dynawo log level, in string representation
+    seconds startTime = seconds(0);              ///< The start time of the simulation
+    seconds stopTime = seconds(100);             ///< the constant duration of the simulation in the job
+    boost::optional<std::string> contingencyId;  ///< Identifier of referred contingency, only for security analysis jobs
+    boost::optional<std::string> baseFilename;   ///< Name for base case filename if we are defining a jobs file for a contingency
 
+   private:
     /**
      * @brief Initialize additional attributes from configuration
      *

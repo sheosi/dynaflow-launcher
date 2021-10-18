@@ -52,7 +52,7 @@ class Context {
     boost::filesystem::path networkFilepath;        ///< network filepath
     boost::filesystem::path settingFilePath;        ///< setting file path for dynamic data base
     boost::filesystem::path assemblingFilePath;     ///< assembling file path for dynamic data base
-    boost::filesystem::path contingenciesFilepath;  ///< contigencies filepath (for Security Analysis simulation)
+    boost::filesystem::path contingenciesFilePath;  ///< contigencies file path for Security Analysis simulation
     std::string dynawoLogLevel;                     ///< string representation of the dynawo log level
     boost::filesystem::path parFileDir;             ///< parameter file directory
     boost::filesystem::path dynawoResDir;           ///< DYNAWO resources
@@ -143,8 +143,8 @@ class Context {
   ContextDef def_;                                         ///< context definition
   inputs::NetworkManager networkManager_;                  ///< network manager
   inputs::DynamicDataBaseManager dynamicDataBaseManager_;  ///< dynamic model configuration manager
+  inputs::ContingenciesManager contingenciesManager_;      ///< contingencies manager in a Security Analysis
   const inputs::Configuration& config_;                    ///< configuration
-  inputs::Contingencies contingencies_;                    ///< contingencies if the simulation is a Security Analysis
 
   std::string basename_;                                                                   ///< basename for all files
   std::vector<inputs::NetworkManager::ProcessNodeCallback> callbacksMainConnexComponent_;  ///< List of algorithms to run in main components
@@ -160,20 +160,21 @@ class Context {
   algo::ShuntCounterDefinitions counters_;                               ///< shunt counters definitions
   algo::LinesByIdDefinitions linesById_;                                 ///< Lines by ids definition
   algo::StaticVarCompensatorDefinitions svarcsDefinitions_;              ///< Static var compensators definitions to use
+  boost::optional<algo::ValidContingencies> validContingencies_;         ///< contingencies accepted for simulation in a Security Analyasis
 
   boost::shared_ptr<job::JobEntry> jobEntry_;                 ///< Dynawo job entry
   std::vector<boost::shared_ptr<job::JobEntry>> jobsEvents_;  ///< Dynawo job entries for contingencies
 
-  /// @brief Initialization of additional instances of network manager
-  void initNetworkManager(dfl::inputs::NetworkManager& networkManager, std::vector<std::shared_ptr<inputs::Node>>& mainConnexNodes);
-
   /// @brief Execute security analysis by running simulations for the base case and all the valid contingencies
   void executeSecurityAnalysis();
 
-  /// @brief Prepare the outputs to simulate all contingencies
+  /// @brief Prepare the job file
+  void exportOutputJob();
+
+  /// @brief Prepare the output files required to simulate the valid contingencies
   void exportOutputsContingencies();
 
   /// @brief Prepare the output files required to simulate a given contingency
-  void exportOutputsContingency(const std::shared_ptr<inputs::Contingencies::ContingencyDefinition>& c);
+  void exportOutputsContingency(const inputs::Contingency& c);
 };
 }  // namespace dfl

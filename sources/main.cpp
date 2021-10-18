@@ -20,8 +20,6 @@
 #include <DYNInitXml.h>
 #include <DYNIoDico.h>
 #include <boost/filesystem.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
 #include <chrono>
 #include <cstdlib>
 #include <sstream>
@@ -121,10 +119,10 @@ main(int argc, char* argv[]) {
     auto simulationKind = getSimulationKind(runtimeConfig);
     switch (simulationKind) {
     case dfl::Context::SimulationKind::STEADY_STATE_CALCULATION:
-      LOG(info) << MESS(InputsSteadyStateInfo, runtimeConfig.networkFilePath, runtimeConfig.configPath) << LOG_ENDL;
+      LOG(info) << MESS(SteadyStateInfo, runtimeConfig.networkFilePath, runtimeConfig.configPath) << LOG_ENDL;
       break;
     case dfl::Context::SimulationKind::SECURITY_ANALYSIS:
-      LOG(info) << MESS(InputsSecurityAnalysisInfo, runtimeConfig.networkFilePath, runtimeConfig.contingenciesFilePath, runtimeConfig.configPath) << LOG_ENDL;
+      LOG(info) << MESS(SecurityAnalysisInfo, runtimeConfig.networkFilePath, runtimeConfig.contingenciesFilePath, runtimeConfig.configPath) << LOG_ENDL;
       break;
     }
 

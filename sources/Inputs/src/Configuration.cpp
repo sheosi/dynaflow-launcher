@@ -22,6 +22,7 @@
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <limits>
 
 namespace dfl {
 namespace inputs {
@@ -66,7 +67,7 @@ updateActivePowerCompensationValue(Configuration::ActivePowerCompensation& activ
 }
 
 /**
- * @brief Helper function to update an a std::chrono::seconds value
+ * @brief Helper function to update a std::chrono::seconds value
  *
  * @param seconds the value to update
  * @param tree the element of the boost tree
@@ -74,9 +75,10 @@ updateActivePowerCompensationValue(Configuration::ActivePowerCompensation& activ
  */
 static void
 updateSeconds(std::chrono::seconds& seconds, const boost::property_tree::ptree& tree, const std::string& key) {
-  auto value_opt = tree.get_child_optional(key);
-  if (value_opt.is_initialized()) {
-    seconds = std::chrono::seconds{value_opt->get_value<unsigned int>()};
+  unsigned int scount = std::numeric_limits<unsigned int>::max();
+  helper::updateValue(scount, tree, key);
+  if (scount != std::numeric_limits<unsigned int>::max()) {
+    seconds = std::chrono::seconds(scount);
   }
 }
 }  // namespace helper
