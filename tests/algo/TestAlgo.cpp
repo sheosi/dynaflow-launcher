@@ -23,6 +23,7 @@
 
 #include <DYNBusInterface.h>
 #include <algorithm>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 #include <map>
@@ -793,4 +794,149 @@ TEST(SVARC, base) {
   auto optSVarC2 = find("SVARC2");
   ASSERT_EQ(optSVarC2->id, "SVARC2");
   ASSERT_EQ(optSVarC2->bMax, 10.);
+}
+
+TEST(ContingencyValidation, base) {
+  auto vl = std::make_shared<dfl::inputs::VoltageLevel>("VL");
+  auto vl2 = std::make_shared<dfl::inputs::VoltageLevel>("VL2");
+  std::vector<std::shared_ptr<dfl::inputs::Node>> nodes{
+      dfl::inputs::Node::build("0", vl, 0.0, {dfl::inputs::Shunt("SHUNT")}),
+      dfl::inputs::Node::build("1", vl, 1.0, {}),
+      dfl::inputs::Node::build("2", vl, 2.0, {}),
+      dfl::inputs::Node::build("3", vl, 3.0, {}),
+      dfl::inputs::Node::build("4", vl2, 5.0, {}),
+      dfl::inputs::Node::build("5", vl2, 5.0, {}),
+      dfl::inputs::Node::build("6", vl2, 0.0, {}),
+      dfl::inputs::Node::build("7", vl2, 0.0, {}),
+      dfl::inputs::Node::build("8", vl2, 0.0, {}),
+  };
+
+  std::vector<dfl::inputs::Generator::ReactiveCurvePoint> points(
+      {dfl::inputs::Generator::ReactiveCurvePoint(12., 44., 440.), dfl::inputs::Generator::ReactiveCurvePoint(65., 44., 440.)});
+
+  auto conv1 = std::make_shared<dfl::inputs::LCCConverter>("LccStation1", "0", nullptr, 1.);
+  auto conv2 = std::make_shared<dfl::inputs::LCCConverter>("LccStation2", "1", nullptr, 1.);
+  auto hvdc_line = dfl::inputs::HvdcLine::build("HVDC_LINE", dfl::inputs::HvdcLine::ConverterType::LCC, conv1, conv2, boost::none, 3.4);
+  conv1->hvdcLine = hvdc_line;
+  conv2->hvdcLine = hvdc_line;
+
+  nodes[1]->lines.push_back(dfl::inputs::Line::build("LINE", nodes[0], nodes[1], "ETE"));
+  nodes[2]->tfos.push_back(dfl::inputs::Tfo::build("TFO", nodes[0], nodes[1], nullptr));
+  nodes[2]->tfos.push_back(dfl::inputs::Tfo::build("TFO3", nodes[0], nodes[1], nodes[3]));
+  nodes[3]->loads.emplace_back("LOAD");
+  nodes[4]->generators.emplace_back("GENERATOR", points, 0, 0, 0, 0, 0, "BUS_1", "BUS_1");
+  nodes[5]->converters.push_back(conv1);
+  nodes[6]->svarcs.emplace_back("SVARC", 0., 10., 100, 230, 215, 230, 235, 245, 10., 10.);
+  nodes[7]->danglingLines.emplace_back("DANGLINGLINE");
+  nodes[8]->busBarSections.emplace_back("BUSBAR");
+
+  using Type = dfl::inputs::ContingencyElement::Type;
+
+  auto contingencies = std::vector<dfl::inputs::Contingency>();
+
+  contingencies.emplace_back("shunt_compensator_contingency");
+  contingencies[0].elements.emplace_back("SHUNT", Type::SHUNT_COMPENSATOR);
+
+  contingencies.emplace_back("line_contingency");
+  contingencies[1].elements.emplace_back("LINE", Type::LINE);
+
+  contingencies.emplace_back("line_contingency_bad_id");
+  contingencies[2].elements.emplace_back("_XXX", Type::LINE);
+
+  contingencies.emplace_back("branch_line_contingency");
+  contingencies[3].elements.emplace_back("LINE", Type::BRANCH);
+
+  contingencies.emplace_back("branch_contingency_bad_id");
+  contingencies[4].elements.emplace_back("_XXX", Type::BRANCH);
+
+  contingencies.emplace_back("two_windings_transformer_contingency");
+  contingencies[5].elements.emplace_back("TFO", Type::TWO_WINDINGS_TRANSFORMER);
+
+  contingencies.emplace_back("two_windings_transformer_contingency_bad_id");
+  contingencies[6].elements.emplace_back("_XXX", Type::TWO_WINDINGS_TRANSFORMER);
+
+  contingencies.emplace_back("branch_tfo_contingency");
+  contingencies[7].elements.emplace_back("TFO", Type::BRANCH);
+
+  contingencies.emplace_back("three_windings_transformer_contingency");
+  contingencies[8].elements.emplace_back("TFO3", Type::THREE_WINDINGS_TRANSFORMER);
+
+  contingencies.emplace_back("three_windings_transformer_contingency_bad_id");
+  contingencies[9].elements.emplace_back("TFO3", Type::THREE_WINDINGS_TRANSFORMER);
+
+  contingencies.emplace_back("load_contingency");
+  contingencies[10].elements.emplace_back("LOAD", Type::LOAD);
+
+  contingencies.emplace_back("load_contingency_bad_id");
+  contingencies[11].elements.emplace_back("_XXX", Type::LOAD);
+
+  contingencies.emplace_back("load_contingency_bad_type");
+  contingencies[12].elements.emplace_back("LOAD", Type::GENERATOR);
+
+  contingencies.emplace_back("generator_contingency");
+  contingencies[13].elements.emplace_back("GENERATOR", Type::GENERATOR);
+
+  contingencies.emplace_back("generator_contingency_bad_id");
+  contingencies[14].elements.emplace_back("_XXX", Type::GENERATOR);
+
+  contingencies.emplace_back("hvdcline_contingency");
+  contingencies[15].elements.emplace_back("HVDC_LINE", Type::HVDC_LINE);
+
+  contingencies.emplace_back("hvdcline_contingency_bad_id");
+  contingencies[16].elements.emplace_back("_XXX", Type::HVDC_LINE);
+
+  contingencies.emplace_back("static_var_compensator_contingency");
+  contingencies[17].elements.emplace_back("SVARC", Type::STATIC_VAR_COMPENSATOR);
+
+  contingencies.emplace_back("dangling_line_contingency");
+  contingencies[18].elements.emplace_back("DANGLINGLINE", Type::DANGLING_LINE);
+
+  contingencies.emplace_back("dangling_line_contingency_bad_id");
+  contingencies[19].elements.emplace_back("_XXX", Type::DANGLING_LINE);
+
+  contingencies.emplace_back("busbarsection_contingency");
+  contingencies[20].elements.emplace_back("BUSBAR", Type::BUSBAR_SECTION);
+
+  contingencies.emplace_back("busbar_section_contingency_bad_id");
+  contingencies[21].elements.emplace_back("_XXX", Type::BUSBAR_SECTION);
+
+  auto val_contingencies = dfl::algo::ValidContingencies(contingencies);
+  auto algo = dfl::algo::ContingencyValidationAlgorithm(val_contingencies);
+
+  std::cout << "A" << std::endl;
+  std::for_each(nodes.begin(), nodes.end(), algo);
+  std::cout << "B" << std::endl;
+  val_contingencies.keepContingenciesWithAllElementsValid();
+
+  auto valid_contingencies = std::set<std::string>();
+  valid_contingencies.emplace("shunt_compensator_contingency");
+  valid_contingencies.emplace("line_contingency");
+  valid_contingencies.emplace("line_contingency_bad_id");
+  valid_contingencies.emplace("branch_line_contingency");
+  valid_contingencies.emplace("branch_contingency_bad_id");
+  valid_contingencies.emplace("two_windings_transformer_contingency");
+  valid_contingencies.emplace("two_windings_transformer_contingency_bad_id");
+  valid_contingencies.emplace("branch_tfo_contingency");
+  valid_contingencies.emplace("three_windings_transformer_contingency");
+  valid_contingencies.emplace("three_windings_transformer_contingency_bad_id");
+  valid_contingencies.emplace("load_contingency");
+  valid_contingencies.emplace("load_contingency_bad_id");
+  valid_contingencies.emplace("load_contingency_bad_type");
+  valid_contingencies.emplace("generator_contingency");
+  valid_contingencies.emplace("generator_contingency_bad_id");
+  valid_contingencies.emplace("hvdcline_contingency");
+  valid_contingencies.emplace("hvdcline_contingency_bad_id");
+  valid_contingencies.emplace("static_var_compensator_contingency");
+  valid_contingencies.emplace("dangling_line_contingency");
+  valid_contingencies.emplace("dangling_line_contingency_bad_id");
+  valid_contingencies.emplace("busbarsection_contingency");
+  valid_contingencies.emplace("busbar_section_contingency_bad_id");
+
+  for (auto c : val_contingencies.get()) {
+    auto c_it = valid_contingencies.find(c.get().id);
+    ASSERT_TRUE(c_it != valid_contingencies.end());
+    valid_contingencies.erase(c_it);
+  }
+
+  ASSERT_TRUE(valid_contingencies.empty());
 }
