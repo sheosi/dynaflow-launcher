@@ -19,7 +19,7 @@
 
 #include "Algo.h"
 #include "Configuration.h"
-#include "Contingencies.h"
+#include "ContingenciesManager.h"
 #include "DynamicDataBaseManager.h"
 #include "NetworkManager.h"
 
@@ -175,6 +175,7 @@ class Context {
   void exportOutputsContingencies();
 
   /// @brief Prepare the output files required to simulate a given contingency
-  void exportOutputsContingency(const inputs::Contingency& c);
+  /// @param contingency the contingency
+  void exportOutputsContingency(const inputs::Contingency& contingency);
 };
 }  // namespace dfl

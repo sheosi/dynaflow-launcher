@@ -38,20 +38,20 @@ ParEvent::write() {
   parameters::XmlExporter exporter;
 
   auto parametersSets = parameters::ParametersSetCollectionFactory::newCollection();
-  for (const auto& e : def_.contingency.elements) {
-    switch (e.type) {
+  for (const auto& element : def_.contingency.elements) {
+    switch (element.type) {
     case Type::BRANCH:
     case Type::LINE:
     case Type::TWO_WINDINGS_TRANSFORMER:
-      parametersSets->addParametersSet(buildBranchDisconnection(e.id, def_.timeOfEvent));
+      parametersSets->addParametersSet(buildBranchDisconnection(element.id, def_.timeOfEvent));
       break;
     case Type::LOAD:
     case Type::GENERATOR:
     case Type::HVDC_LINE:
-      parametersSets->addParametersSet(buildEventSetPointBooleanDisconnection(e.id, def_.timeOfEvent));
+      parametersSets->addParametersSet(buildEventSetPointBooleanDisconnection(element.id, def_.timeOfEvent));
       break;
     default:
-      parametersSets->addParametersSet(buildEventSetPointRealDisconnection(e.id, def_.timeOfEvent));
+      parametersSets->addParametersSet(buildEventSetPointRealDisconnection(element.id, def_.timeOfEvent));
     }
   }
 

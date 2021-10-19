@@ -227,8 +227,8 @@ Context::exportOutputJob() {
 void
 Context::exportOutputsContingencies() {
   if (validContingencies_) {
-    for (const auto& c : validContingencies_->get()) {
-      exportOutputsContingency(c);
+    for (const auto& contingency : validContingencies_->get()) {
+      exportOutputsContingency(contingency);
     }
   }
 }
@@ -305,12 +305,12 @@ Context::executeSecurityAnalysis() {
   baseCase->setId("BaseCase");
   scenarios->addScenario(baseCase);
   if (validContingencies_) {
-    for (const auto& c : validContingencies_->get()) {
+    for (const auto& contingencyRef : validContingencies_->get()) {
       auto scenario = boost::make_shared<DYNAlgorithms::Scenario>();
-      scenario->setId(c.get().id);
-      scenario->setDydFile(basename_ + "-" + c.get().id + ".dyd");
+      scenario->setId(contingencyRef.get().id);
+      scenario->setDydFile(basename_ + "-" + contingencyRef.get().id + ".dyd");
       scenarios->addScenario(scenario);
-      LOG(info) << MESS(ContingencySimulationDefined, c.get().id) << LOG_ENDL;
+      LOG(info) << MESS(ContingencySimulationDefined, contingencyRef.get().id) << LOG_ENDL;
     }
   }
   // Use dynawo-algorithms Systematic Analysis Launcher to simulate all the scenarios

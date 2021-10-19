@@ -13,6 +13,7 @@ set(SOURCES
   src/Configuration.cpp
   src/HvdcLine.cpp
   src/Contingencies.cpp
+  src/ContingenciesManager.cpp
   src/DynamicDataBaseManager.cpp
   src/SettingXmlDocument.cpp
   src/AssemblingXmlDocument.cpp

@@ -689,17 +689,15 @@ ContingencyValidationAlgorithm::operator()(const NodePtr& node) {
   for (const auto& line : node->lines) {
     validContingencies_.markElementValid(line.lock()->id, Type::LINE);
   }
-  for (const auto& trans_ptr : node->tfos) {
-    const auto& trans = trans_ptr.lock();
-    switch (trans->nodes.size()) {
+  for (const auto& tfoPtr : node->tfos) {
+    const auto& tfo = tfoPtr.lock();
+    switch (tfo->nodes.size()) {
     case 2:
-      validContingencies_.markElementValid(trans->id, Type::TWO_WINDINGS_TRANSFORMER);
+      validContingencies_.markElementValid(tfo->id, Type::TWO_WINDINGS_TRANSFORMER);
       break;
     case 3:
-      validContingencies_.markElementValid(trans->id, Type::TWO_WINDINGS_TRANSFORMER);
+      validContingencies_.markElementValid(tfo->id, Type::THREE_WINDINGS_TRANSFORMER);
       break;
-    default:
-      throw std::logic_error("Unexpected size of transformer");
     }
   }
   for (const auto& converter : node->converters) {
@@ -714,21 +712,68 @@ ContingencyValidationAlgorithm::operator()(const NodePtr& node) {
   for (const auto& shunt : node->shunts) {
     validContingencies_.markElementValid(shunt.id, Type::SHUNT_COMPENSATOR);
   }
-  for (const auto& dline : node->danglingLines) {
-    validContingencies_.markElementValid(dline.id, Type::DANGLING_LINE);
+  for (const auto& danglingLine : node->danglingLines) {
+    validContingencies_.markElementValid(danglingLine.id, Type::DANGLING_LINE);
   }
-  for (const auto& staticVarComp : node->svarcs) {
-    validContingencies_.markElementValid(staticVarComp.id, Type::STATIC_VAR_COMPENSATOR);
+  for (const auto& svarc : node->svarcs) {
+    validContingencies_.markElementValid(svarc.id, Type::STATIC_VAR_COMPENSATOR);
   }
-  for (const auto& busbarsection : node->busBarSections) {
-    validContingencies_.markElementValid(busbarsection.id, Type::BUSBAR_SECTION);
+  for (const auto& busBarSection : node->busBarSections) {
+    validContingencies_.markElementValid(busBarSection.id, Type::BUSBAR_SECTION);
   }
 }
 
 ValidContingencies::ValidContingencies(const std::vector<inputs::Contingency>& contingencies) : contingencies_(std::ref(contingencies)) {
-  for (const auto& c : contingencies_.get()) {
-    for (const auto& e : c.elements) {
-      elementContingencies_[e.id].push_back(std::ref(c));
+  for (const auto& contingency : contingencies_.get()) {
+    for (const auto& element : contingency.elements) {
+      elementContingencies_[element.id].push_back(std::ref(contingency));
+    }
+  }
+}
+
+void
+ValidContingencies::markElementValid(const ElementId& elementId, inputs::ContingencyElement::Type elementType) {
+  const auto& elementContingencies = elementContingencies_.find(elementId);
+  if (elementContingencies != elementContingencies_.end()) {
+    // For all contingencies where the element is referred ...
+    for (const auto& contingencyRef : elementContingencies->second) {
+      const auto& contingency = contingencyRef.get();
+      // Find the element inside the input contingency ...
+      auto contingencyElement = std::find_if(contingency.elements.begin(), contingency.elements.end(),
+                                             [&elementId](const inputs::ContingencyElement& contingencyElement) { return contingencyElement.id == elementId; });
+      if (contingencyElement != contingency.elements.end()) {
+        // And check it has been given with a valid type,
+        // according to the reference type found in the network
+        if (inputs::ContingencyElement::isCompatible((*contingencyElement).type, elementType)) {
+          // If type is compatible, add the element to the list of valid elements found for the contingency
+          validatingContingencies_[contingency.id].insert(elementId);
+        }
+      }
+    }
+  }
+}
+
+void
+ValidContingencies::keepContingenciesWithAllElementsValid() {
+  // A contingency is valid for simulation if all its elements have been marked as valid
+  for (const auto& contingency : contingencies_.get()) {
+    auto validatingContingency = validatingContingencies_.find(contingency.id);
+    if (validatingContingency == validatingContingencies_.end()) {
+      // For this contingency we have not found any valid element
+      LOG(warn) << MESS(ContingencyInvalidForSimulationNoValidElements, contingency.id) << LOG_ENDL;
+    } else {
+      bool valid = true;
+      // Iterate over all the elements in the input contingency
+      for (const auto& element : contingency.elements) {
+        // Check that the element has been marked as valid
+        if ((*validatingContingency).second.find(element.id) == (*validatingContingency).second.end()) {
+          LOG(warn) << MESS(ContingencyInvalidForSimulation, contingency.id, element.id) << LOG_ENDL;
+          valid = false;
+        }
+      }
+      if (valid) {
+        validContingencies_.push_back(contingency);
+      }
     }
   }
 }

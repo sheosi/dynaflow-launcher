@@ -51,29 +51,29 @@ DydEvent::write() const {
   dynamicModels->addMacroConnector(connector);
 
   // models and connections
-  for (const auto& e : def_.contingency.elements) {
-    switch (e.type) {
+  for (const auto& element : def_.contingency.elements) {
+    switch (element.type) {
     case Type::BRANCH:
     case Type::LINE:
     case Type::TWO_WINDINGS_TRANSFORMER:
-      dynamicModels->addModel(buildBranchDisconnection(e.id, def_.basename));
-      dynamicModels->addMacroConnect(buildBranchDisconnectionConnect(e.id));
+      dynamicModels->addModel(buildBranchDisconnection(element.id, def_.basename));
+      dynamicModels->addMacroConnect(buildBranchDisconnectionConnect(element.id));
       break;
     case Type::LOAD:
-      dynamicModels->addModel(buildSwitchOffSignalDisconnection(e.id, def_.basename));
-      addSwitchOffSignalDisconnectionConnect(dynamicModels, e.id, "switchOff2");
+      dynamicModels->addModel(buildSwitchOffSignalDisconnection(element.id, def_.basename));
+      addSwitchOffSignalDisconnectionConnect(dynamicModels, element.id, "switchOff2");
       break;
     case Type::GENERATOR:
-      dynamicModels->addModel(buildSwitchOffSignalDisconnection(e.id, def_.basename));
-      addSwitchOffSignalDisconnectionConnect(dynamicModels, e.id, "generator_switchOffSignal2");
+      dynamicModels->addModel(buildSwitchOffSignalDisconnection(element.id, def_.basename));
+      addSwitchOffSignalDisconnectionConnect(dynamicModels, element.id, "generator_switchOffSignal2");
       break;
     case Type::HVDC_LINE:
-      dynamicModels->addModel(buildSwitchOffSignalDisconnection(e.id, def_.basename));
-      addSwitchOffSignalDisconnectionConnect(dynamicModels, e.id, "hvdc_switchOffSignal2");
+      dynamicModels->addModel(buildSwitchOffSignalDisconnection(element.id, def_.basename));
+      addSwitchOffSignalDisconnectionConnect(dynamicModels, element.id, "hvdc_switchOffSignal2");
       break;
     default:
-      dynamicModels->addModel(buildNetworkStateDisconnection(e.id, def_.basename));
-      addNetworkStateDisconnectionConnect(dynamicModels, e.id);
+      dynamicModels->addModel(buildNetworkStateDisconnection(element.id, def_.basename));
+      addNetworkStateDisconnectionConnect(dynamicModels, element.id);
     }
   }
 

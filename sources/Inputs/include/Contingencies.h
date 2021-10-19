@@ -69,7 +69,7 @@ struct ContingencyElement {
    *
    * Parses a string into its enum value
    *
-   * @return none if not a valid type, otherwise the enum value
+   * @param filepath the JSON contingencies file to use
    */
   static boost::optional<Type> typeFromString(const std::string& str);
 
@@ -78,7 +78,7 @@ struct ContingencyElement {
    *
    * Transforms a type enum value into its string representation
    *
-   * @return string representation of element type
+   * @return contingency list
    */
   static std::string toString(Type type);
 
@@ -99,38 +99,6 @@ struct Contingency {
 
   const std::string id;                      ///< Identifier of the contingency
   std::vector<ContingencyElement> elements;  ///< Elements affected by the contingency
-};
-
-/**
- * @brief Manage the contingencies given as input for a Security Analysis simulation
- */
-class ContingenciesManager {
- public:
-  /**
-   * @brief Constructor
-   *
-   * Load contingency from file. Exit the program on error in parsing the file
-   *
-   * @param filepath the JSON contingencies file to use
-   */
-  explicit ContingenciesManager(const boost::filesystem::path& filepath);
-
-  /**
-   * @brief List of contingencies
-   *
-   * Obtain the list of contingencies defined in the input
-   *
-   * @return contingency list
-   */
-  const std::vector<Contingency>& get() const {
-    return contingencies_;
-  }
-
- private:
-  /// @brief Load contingencies from an input file
-  void load(const boost::filesystem::path& filepath);
-
-  std::vector<Contingency> contingencies_;  ///< Contingencies obtained from input file
 };
 
 }  // namespace inputs

@@ -37,7 +37,7 @@ class Job {
    * @brief Job definition on DFL point of view
    */
   struct JobDefinition {
-    using seconds = std::chrono::seconds;  ///< Alias for seconds
+    using Seconds = std::chrono::seconds;  ///< Alias for seconds
 
     /**
      * @brief Constructor
@@ -78,8 +78,8 @@ class Job {
 
     std::string filename;                        ///< filename of the job output file
     std::string dynawoLogLevel;                  ///< Dynawo log level, in string representation
-    seconds startTime = seconds(0);              ///< The start time of the simulation
-    seconds stopTime = seconds(100);             ///< the constant duration of the simulation in the job
+    Seconds startTime = Seconds(0);              ///< The start time of the simulation
+    Seconds stopTime = Seconds(100);             ///< the constant duration of the simulation in the job
     boost::optional<std::string> contingencyId;  ///< Identifier of referred contingency, only for security analysis jobs
     boost::optional<std::string> baseFilename;   ///< Name for base case filename if we are defining a jobs file for a contingency
 
