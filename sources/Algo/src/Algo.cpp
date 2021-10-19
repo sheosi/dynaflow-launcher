@@ -756,52 +756,6 @@ ValidContingencies::markElementValid(const ElementId& elementId, inputs::Conting
 void
 ValidContingencies::keepContingenciesWithAllElementsValid() {
   // A contingency is valid for simulation if all its elements have been marked as valid
-  for (const auto& contingency : contingencies_.get()) {
-    auto validatingContingency = validatingContingencies_.find(contingency.id);
-    if (validatingContingency == validatingContingencies_.end()) {
-      // For this contingency we have not found any valid element
-      LOG(warn) << MESS(ContingencyInvalidForSimulationNoValidElements, contingency.id) << LOG_ENDL;
-    } else {
-      bool valid = true;
-      // Iterate over all the elements in the input contingency
-      for (const auto& element : contingency.elements) {
-        // Check that the element has been marked as valid
-        if ((*validatingContingency).second.find(element.id) == (*validatingContingency).second.end()) {
-          LOG(warn) << MESS(ContingencyInvalidForSimulation, contingency.id, element.id) << LOG_ENDL;
-          valid = false;
-        }
-      }
-      if (valid) {
-        validContingencies_.push_back(contingency);
-      }
-    }
-  }
-}
-
-void
-ValidContingencies::markElementValid(const ElementId& elementId, inputs::ContingencyElement::Type elementType) {
-  const auto& ecs = elementContingencies_.find(elementId);
-  if (ecs != elementContingencies_.end()) {
-    // For all contingencies where the element is referred ...
-    for (const auto& cref : ecs->second) {
-      const auto& c = cref.get();
-      // Find the element inside the input contingency ...
-      auto ce = std::find_if(c.elements.begin(), c.elements.end(), [elementId](const inputs::ContingencyElement& ce) { return ce.id == elementId; });
-      if (ce != c.elements.end()) {
-        // And check it has been given with a valid type,
-        // according to the reference type found in the network
-        if (inputs::ContingencyElement::isCompatible((*ce).type, elementType)) {
-          // If type is valid, add the element to the list of valid elements found for the contingency
-          validatingContingencies_[c.id].insert(elementId);
-        }
-      }
-    }
-  }
-}
-
-void
-ValidContingencies::keepContingenciesWithAllElementsValid() {
-  // A contingency is valid for simulation if all its elements have been marked as valid
   for (const auto& c : contingencies_.get()) {
     auto vc = validatingContingencies_.find(c.id);
     if (vc == validatingContingencies_.end()) {
