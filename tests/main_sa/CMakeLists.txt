@@ -9,7 +9,7 @@
 
 add_test(
     NAME MAIN_SA.varEnv
-    COMMAND DynaFlowLauncher --network=res/TestIIDM_launch_infinite.iidm --config=res/launch_infinite.json --contingencies=res/contingencies.json
+    COMMAND DynaFlowLauncher --network=res/TestIIDM_launch.iidm --config=res/config_launch.json --contingencies=res/contingencies_launch.json
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
 # Test will fail because environement variables are not set
