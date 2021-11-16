@@ -36,13 +36,13 @@ jobs:
         with:
           repo: "sheosi/dynawo"
           version: "tags/nightly"
-          file: "Dynawo_V${{ env.VERSION }}"
-          target: "dynawo/dynawo.zip"
+          file: "Dynawo_headers_V${{ env.VERSION }}"
+          target: "dynawo.zip"
           token: "${{ secrets.GITHUB_TOKEN }}"
           
       - name: Extract Dynawo
         run: |
-          cd dynawo
+          # Does not need folder, one will be created by itself
           unzip -qq "dynawo.zip"
           cd ..
       
