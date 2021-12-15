@@ -69,7 +69,6 @@ jobs:
           
       - name: Extract Dynawo algorithms
         run: |
-          cd dynawo-algorithms
           unzip -qq "Dynawo_algorithms_headers_V${VERSION}.zip"
           cd ..
 
