@@ -58,8 +58,8 @@ jobs:
             fi
           }
           
-          download_asset sheosi/dynawo Dynawo_headers_V${VERSION}.zip
-          download_asset sheosi/dynawo-algorithms Dynawo_algorithms_headers_V${VERSION}.zip
+          download_asset sheosi/dynawo Dynawo_Linux_headers_V${VERSION}.zip
+          download_asset sheosi/dynawo-algorithms Dynawo_Linux_algorithms_headers_V${VERSION}.zip
           
       - name: Extract Dynawo
         run: |
